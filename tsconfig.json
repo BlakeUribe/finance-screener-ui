@@ -20,7 +20,7 @@
     }
   },
   "include": [
-    "next-env.d.ts",
+    "idk/next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".storybook/main.ts",
