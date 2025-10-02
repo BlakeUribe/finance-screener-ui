@@ -1,61 +1,63 @@
 import { useState, useMemo } from 'react';
-import { Stack } from '@mantine/core';
-
-import { DataTable } from '../components/DataTable';
+import { Stack, Button } from '@mantine/core';
 import { StockFilter } from '@/components/StockFilter';
+import { DataTable } from '@/components/DataTable';
 import { stockData } from '../dummy_data/stock_data';
 
 interface FilterValues {
-  sector?: string;
-  index?: string;
-  industry?: string;
-  country?: string;
-  pe?: string;
-  profitMargin?: string;
-  [key: string]: string | undefined;
+  [key: string]: string | number | [number, number] | undefined; // dynamic, works for both qualitative and quantitative fields
 }
 
 export default function StockScreener() {
   const [filters, setFilters] = useState<FilterValues>({});
+  const [selectedRows, setSelectedRows] = useState<typeof stockData>([]);
+
 
   const filteredData = useMemo(() => {
     return stockData.filter((item) => {
-      if (filters.sector && item.sector !== filters.sector) return false;
-      // if (filters.index && item.index !== filters.index) return false; // make sure `index` exists on stockData
-      // add more filter rules as needed
-      return true;
+      return Object.entries(filters).every(([key, value]) => {
+        const field = (item as any)[key]; // cast to any
+
+        if (value === undefined) return true;
+
+        if (typeof value === 'string') return field === value;
+        if (Array.isArray(value) && typeof field === 'number') {
+          const [min, max] = value;
+          return field >= min && field <= max;
+        }
+        if (typeof value === 'number' && typeof field === 'number') return field === value;
+
+        return true;
+      });
     });
   }, [filters]);
 
   return (
-    <div>
-      <h2>Stock Screener</h2>
-      <h4>Next: A good idea for filter, is simple to get unique vals of table, 
-        and then store that data inside for a slection, 
-        this would help the componet in being more general i.e. it would run uniqe cols, 
-        then uniqe vals of cols then apply that info to the filter
-        alternativly we could just pass the table as params to stock filter, then it would match the uniqe vals to the cols, would be easier to do this,
-        , and need to have data saving feature
-        </h4>
+    <Stack bg="var(--mantine-color-body)" align="center" justify="center" gap="lg">
 
-    <Stack
-      bg="var(--mantine-color-body)"
-      align="center"
-      justify="center"
-      gap="lg"
-    >
-      <StockFilter values={filters} onChange={setFilters} />
+      <StockFilter 
+        data={stockData} 
+        values={filters} 
+        onChange={setFilters} 
+      />
 
       <DataTable
         data={filteredData}
         rowsPerPage={10}
-        onSelectionChange={(selected) =>
-          console.log('Selected rows:', selected)
-        }
+        onSelectionChange={(selected) => setSelectedRows(selected)}
       />
+
+      {selectedRows.length > 0 && (
+        <Button
+          component='a'
+          href='/model-selection'
+          onClick={() => console.log('Selected rows:', selectedRows)}
+        >
+          Create and optimize a portfolio with my {selectedRows.length} selected stock(s)
+        </Button>
+      )}
+
+
     </Stack>
-    </div>
   );
 }
-
-

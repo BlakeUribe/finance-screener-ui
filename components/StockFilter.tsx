@@ -1,25 +1,56 @@
-import { Container, Grid, Select, Tabs } from '@mantine/core';
+import { Container, Grid, Select, Tabs, Slider, RangeSlider, Text } from '@mantine/core';
 import { IconLetterCase, IconMathXDivideY2, IconSettings } from '@tabler/icons-react';
 
-export interface FilterValues {
-  index?: string;
-  sector?: string;
-  industry?: string;
-  country?: string;
-  pe?: string;
-  profitMargin?: string;
-  [key: string]: string | undefined; // allow additional dynamic fields
-}
+type FilterValues = { [key: string]: string | number | [number, number] | undefined };
+
 
 interface StockFilterProps {
+  data: Record<string, any>[];   // dynamic data array
   values: FilterValues;
   onChange: (values: FilterValues) => void;
 }
 
-export function StockFilter({ values, onChange }: StockFilterProps) {
-  const handleChange = (field: string, value: string | null) => {
+export function StockFilter({ data, values, onChange }: StockFilterProps) {
+  // Helper to update filter values
+  const handleChange = (field: string, value: string | number | [number, number] | null) => {
     onChange({ ...values, [field]: value ?? undefined });
   };
+
+  // Dynamically determine qualitative fields (string-type)
+  const qualitativeFields = data.length
+    ? Object.keys(data[0]).filter((key) => typeof data[0][key] === 'string')
+    : [];
+
+  // Dynamically determine quantitative fields (number-type)
+  const quantitativeFields = data.length
+    ? Object.keys(data[0]).filter((key) => typeof data[0][key] === 'number')
+    : [];
+
+  // Compute unique values for each qualitative field
+  const uniqueQualValues: { [key: string]: string[] } = {};
+  qualitativeFields.forEach((key) => {
+    uniqueQualValues[key] = Array.from(
+      new Set(data.map((item) => item[key]).filter(Boolean))
+    );
+  });
+
+  // Compute min and max for each quantitative field
+const quantitativeStats: { [key: string]: { min: number; max: number } } = {};
+
+  quantitativeFields.forEach((key) => {
+    // Collect all numeric values and filter out null/undefined
+    const values = data
+      .map((item) => item[key])
+      .filter((v): v is number => typeof v === 'number'); // type guard ensures TypeScript knows these are numbers
+
+    if (values.length === 0) return;
+
+    // Compute min and max, works for integers and decimals
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    quantitativeStats[key] = { min, max };
+  });
 
   return (
     <Container fluid h="100%" w="100%" p="md">
@@ -28,8 +59,8 @@ export function StockFilter({ values, onChange }: StockFilterProps) {
           <Tabs.Tab value="Qualitative" leftSection={<IconLetterCase size={16} />}>
             Qualitative
           </Tabs.Tab>
-          <Tabs.Tab value="KPI" leftSection={<IconMathXDivideY2 size={16} />}>
-            KPI
+          <Tabs.Tab value="Quantitative" leftSection={<IconMathXDivideY2 size={16} />}>
+            Quantitative
           </Tabs.Tab>
           <Tabs.Tab value="Placeholder" leftSection={<IconSettings size={16} />}>
             Placeholder
@@ -39,68 +70,50 @@ export function StockFilter({ values, onChange }: StockFilterProps) {
         {/* Qualitative Filters */}
         <Tabs.Panel value="Qualitative" pt="md">
           <Grid grow gutter="lg">
-            <Grid.Col span="auto">
-              <Select
-                label="Index"
-                placeholder="Pick value"
-                data={['S&P 500', 'NASDAQ 100', 'Russell 2000', 'STOXX Europe 600']}
-                value={values.index}
-                onChange={(v) => handleChange('index', v)}
-              />
-            </Grid.Col>
-            <Grid.Col span="auto">
-              <Select
-                label="Sector"
-                placeholder="Pick value"
-                data={['Technology', 'Communication Services', 'Consumer Discretionary', 'Financials']}
-                value={values.sector}
-                onChange={(v) => handleChange('sector', v)}
-              />
-            </Grid.Col>
-            <Grid.Col span="auto">
-              <Select
-                label="Industry"
-                placeholder="Pick value"
-                data={['Communication Equipment', 'Asset Management', 'Auto Parts', 'ETF']}
-                value={values.industry}
-                onChange={(v) => handleChange('industry', v)}
-              />
-            </Grid.Col>
-            <Grid.Col span="auto">
-              <Select
-                label="Country"
-                placeholder="Pick value"
-                data={['USA', 'Foreign (ex-USA)']}
-                value={values.country}
-                onChange={(v) => handleChange('country', v)}
-              />
-            </Grid.Col>
+            {qualitativeFields.map((key) => (
+              <Grid.Col span="auto" key={key}>
+                <Select
+                  label={key.charAt(0).toUpperCase() + key.slice(1)} // Capitalize key for label
+                  placeholder={`Pick ${key.charAt(0).toUpperCase() + key.slice(1)}`}
+                  data={uniqueQualValues[key]}
+                  value={typeof values[key] === 'string' ? values[key] : undefined} // only pass string
+                  onChange={(v) => handleChange(key, v)}
+                />
+              </Grid.Col>
+            ))}
           </Grid>
         </Tabs.Panel>
 
         {/* KPI Filters */}
-        <Tabs.Panel value="KPI" pt="md">
-          <Grid grow gutter="lg">
-            <Grid.Col span="auto">
-              <Select
-                label="P/E"
-                placeholder="Pick value"
-                data={['Below x', 'Above x']}
-                value={values.pe}
-                onChange={(v) => handleChange('pe', v)}
-              />
+      <Tabs.Panel value="Quantitative" pt="md">
+        <Grid grow gutter="lg">
+          {quantitativeFields.map((key) => (
+            <Grid.Col span="auto" key={key}>
+              <Text>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+
+{/* Issue with reading decimals */}
+                <RangeSlider
+                  min={quantitativeStats[key].min}
+                  max={quantitativeStats[key].max}
+                  minRange={0.00}
+                  step={0.01} // set step for decimals
+                  value={
+                    Array.isArray(values[key])
+                      ? (values[key] as [number, number])
+                      : [quantitativeStats[key].min, quantitativeStats[key].max]
+                  }
+                  onChange={(v: [number, number]) => handleChange(key, v)}
+                  marks={[
+                    { value: quantitativeStats[key].min, label: `${quantitativeStats[key].min}` },
+                    { value: quantitativeStats[key].max, label: `${quantitativeStats[key].max}` },
+                  ]}
+                />
+
             </Grid.Col>
-            <Grid.Col span="auto">
-              <Select
-                label="Profit Margin"
-                placeholder="Pick value"
-                data={['Below x', 'Above x']}
-                value={values.profitMargin}
-                onChange={(v) => handleChange('profitMargin', v)}
-              />
-            </Grid.Col>
-          </Grid>
+          ))}
+        </Grid>
         </Tabs.Panel>
+
       </Tabs>
     </Container>
   );
