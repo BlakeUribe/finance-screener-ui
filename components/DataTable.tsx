@@ -1,7 +1,7 @@
+'use client';
+
 import { useState } from 'react';
 import {
-  Center,
-  Group,
   ScrollArea,
   Table,
   Text,
@@ -9,9 +9,12 @@ import {
   UnstyledButton,
   Checkbox,
   Pagination,
+  Group,
+  useMantineTheme,
+  Center,
 } from '@mantine/core';
 import { IconChevronDown, IconChevronUp, IconSelector, IconSearch } from '@tabler/icons-react';
-import classes from './TableSort.module.css';
+import { buttonBackgroundColor } from "@/theme";
 
 interface ThProps {
   children: React.ReactNode;
@@ -22,13 +25,20 @@ interface ThProps {
 
 function Th({ children, sorted, reversed, onSort }: ThProps) {
   const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
+
   return (
-    <Table.Th className={classes.th}>
-      <UnstyledButton onClick={onSort} className={classes.control}>
-        <Group>
-          <Text fw={500} fz="sm">{children}</Text>
-          <Center className={classes.icon}><Icon size={16} stroke={1.5} /></Center>
-        </Group>
+    <Table.Th>
+      <UnstyledButton
+        onClick={onSort}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {children} {/* plain text will inherit Mantine's table header styling */}
+        <Icon size={16} stroke={1.5} />
       </UnstyledButton>
     </Table.Th>
   );
@@ -45,6 +55,7 @@ export function DataTable<T extends Record<string, any>>({
   rowsPerPage = 10,
   onSelectionChange,
 }: DataTableProps<T>) {
+  const theme = useMantineTheme();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<keyof T | null>(null);
   const [reverseSort, setReverseSort] = useState(false);
@@ -61,10 +72,10 @@ export function DataTable<T extends Record<string, any>>({
   // Sort
   const sortedData = sortBy
     ? [...filteredData].sort((a, b) => {
-        const aVal = String(a[sortBy]);
-        const bVal = String(b[sortBy]);
-        return reverseSort ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
-      })
+      const aVal = String(a[sortBy]);
+      const bVal = String(b[sortBy]);
+      return reverseSort ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+    })
     : filteredData;
 
   // Pagination
@@ -91,10 +102,17 @@ export function DataTable<T extends Record<string, any>>({
         onChange={e => { setSearch(e.currentTarget.value); setActivePage(1); }}
       />
 
-      <Table horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed" striped highlightOnHover>
-        <Table.Tbody>
+      <Table
+        horizontalSpacing="md"
+        verticalSpacing="xs"
+        miw={700}
+        layout="fixed"
+        highlightOnHover
+        withTableBorder
+      >
+        <Table.Thead>
           <Table.Tr>
-            <Table.Th></Table.Th>
+            <Table.Th></Table.Th> {/* checkbox column */}
             {keys.map(key => (
               <Th
                 key={String(key)}
@@ -106,31 +124,30 @@ export function DataTable<T extends Record<string, any>>({
                   setSortBy(key);
                 }}
               >
-                {String(key)}
+                {String(key)} {/* no <Text fw={500}> needed */}
               </Th>
             ))}
           </Table.Tr>
-        </Table.Tbody>
+        </Table.Thead>
 
         <Table.Tbody>
-          {paginatedData.length > 0 ? (
-            paginatedData.map((row, idx) => (
-              <Table.Tr key={idx} bg={selectedRows.includes(row) ? 'var(--mantine-color-blue-light)' : undefined}>
-                <Table.Td>
-                  <Checkbox checked={selectedRows.includes(row)} onChange={() => toggleRow(row)} />
-                </Table.Td>
-                {keys.map(key => (
-                  <Table.Td key={String(key)}>{String(row[key])}</Table.Td>
-                ))}
-              </Table.Tr>
-            ))
-          ) : (
-            <Table.Tr>
-              <Table.Td colSpan={keys.length + 1}>
-                <Text fw={500} ta="center">No data found</Text>
+          {paginatedData.map((row, idx) => (
+            <Table.Tr
+              key={idx}
+              bg={selectedRows.includes(row) ? theme.colors.brand[buttonBackgroundColor] : undefined}
+            >
+              <Table.Td>
+                <Checkbox
+                  checked={selectedRows.includes(row)}
+                  onChange={() => toggleRow(row)}
+                  color="brand"
+                />
               </Table.Td>
+              {keys.map(key => (
+                <Table.Td key={String(key)}>{String(row[key])}</Table.Td>
+              ))}
             </Table.Tr>
-          )}
+          ))}
         </Table.Tbody>
       </Table>
 
@@ -140,6 +157,7 @@ export function DataTable<T extends Record<string, any>>({
           total={Math.ceil(sortedData.length / rowsPerPage)}
           onChange={setActivePage}
           size="sm"
+          color="brand"
         />
       </Group>
     </ScrollArea>

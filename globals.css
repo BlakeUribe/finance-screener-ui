@@ -1,0 +1,37 @@
+/* globals.css */
+
+/* Default / dark theme colors */
+:root {
+  --bg-dark: hsl(216 68% 2%);
+  --bg: hsl(211 45% 5%);
+  --bg-light: hsl(210 26% 9%);
+  --text: hsl(210 100% 96%);
+  --text-muted: hsl(210 22% 70%);
+  --highlight: hsl(210 15% 40%);
+  --border: hsl(210 19% 29%);
+  --border-muted: hsl(209 28% 18%);
+  --primary: hsl(209 77% 71%);
+  --secondary: hsl(31 62% 64%);
+  --danger: hsl(9 26% 64%);
+  --warning: hsl(52 19% 57%);
+  --success: hsl(146 17% 59%);
+  --info: hsl(217 28% 65%);
+}
+
+/* Light theme override */
+body.light {
+  --bg-dark: hsl(210 34% 90%);
+  --bg: hsl(210 73% 95%);
+  --bg-light: hsl(210 100% 100%);
+  --text: hsl(212 81% 5%);
+  --text-muted: hsl(210 19% 29%);
+  --highlight: hsl(210 100% 100%);
+  --border: hsl(210 12% 51%);
+  --border-muted: hsl(210 17% 63%);
+  --primary: hsl(206 82% 26%);
+  --secondary: hsl(37 100% 17%);
+  --danger: hsl(9 21% 41%);
+  --warning: hsl(52 23% 34%);
+  --success: hsl(147 19% 36%);
+  --info: hsl(217 22% 41%);
+}

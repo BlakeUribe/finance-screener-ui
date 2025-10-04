@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Stack, Button } from '@mantine/core';
+import { Stack, Button, Container, Box } from '@mantine/core';
 import { StockFilter } from '@/components/StockFilter';
 import { DataTable } from '@/components/DataTable';
 import { stockData } from '../dummy_data/stock_data';
@@ -34,12 +34,22 @@ export default function StockScreener() {
 
   return (
     <Stack bg="var(--mantine-color-body)" align="center" justify="center" gap="lg">
-
-      <StockFilter 
-        data={stockData} 
-        values={filters} 
-        onChange={setFilters} 
-      />
+  <Box
+    w="100%"
+    // mx="calc(-50vw + 50%)"
+    // p="md"
+    style={{
+      // backgroundColor: shade,
+      borderRadius: "0.5rem",
+      border: `2px solid rgba(0,0,0,0.15)`,
+      transition: "all 0.2s ease",
+    }}
+  >    <StockFilter
+      data={stockData}
+      values={filters}
+      onChange={setFilters}
+    />
+  </Box>
 
       <DataTable
         data={filteredData}
@@ -56,7 +66,6 @@ export default function StockScreener() {
           Create and optimize a portfolio with my {selectedRows.length} selected stock(s)
         </Button>
       )}
-
 
     </Stack>
   );

@@ -1,4 +1,4 @@
-'use client'; // ensure this is a client component for Mantine hooks
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
@@ -11,6 +11,7 @@ import {
   ScrollArea,
   ActionIcon,
   useMantineColorScheme,
+  Box,
 } from '@mantine/core';
 
 import {
@@ -22,24 +23,68 @@ import {
   IconMoon,
   IconCurrencyDollar,
   IconCoinBitcoin,
+  IconRainbow,
 } from '@tabler/icons-react';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+// Define links with potential nested children
+const links = [
+  { label: 'Home', href: '/', icon: <IconHomeFilled size={16} /> },
+  { label: 'Portfolio', href: '/portfolio', icon: <IconChartDots2 size={16} /> },
+  {
+    label: 'Screeners',
+    icon: <IconTable size={16} />,
+    children: [
+      { label: 'Stock Screener', href: '/stock-screener', icon: <IconCurrencyDollar size={16} /> },
+      { label: 'Crypto Screener', href: '/crypto-screener', icon: <IconCoinBitcoin size={16} /> },
+    ],
+  },
+  { label: 'Colors', href: '/color-page', icon: <IconRainbow size={16} /> },
+  { label: 'Place Holder', href: '/placeholder', icon: <IconFolderPlus size={16} /> },
+];
+
 export function AppLayout({ children }: AppLayoutProps) {
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
   const { colorScheme, setColorScheme } = useMantineColorScheme();
+
+  // Recursive function to render NavLinks including nested children
+  const renderNavLink = (link: any) => {
+    if (link.children) {
+      return (
+        <NavLink
+          key={link.label}
+          label={link.label}
+          leftSection={link.icon}
+          childrenOffset={28}
+        >
+          {link.children.map((child: any) => renderNavLink(child))}
+        </NavLink>
+      );
+    }
+
+    return (
+      <NavLink
+        key={link.href}
+        component={Link}
+        href={link.href}
+        label={link.label}
+        leftSection={link.icon}
+        active={pathname === link.href}
+      />
+    );
+  };
 
   return (
     <AppShell
@@ -51,9 +96,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
       }}
     >
+      {/* Header */}
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
-          {/* Left side items */}
           <Group>
             {mounted && (
               <>
@@ -64,7 +109,6 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Title order={1}>My Finance Screener</Title>
           </Group>
 
-          {/* Right side items */}
           <Group>
             {mounted && (
               <ActionIcon
@@ -75,7 +119,6 @@ export function AppLayout({ children }: AppLayoutProps) {
                 {colorScheme === 'light' ? <IconSun stroke={1.5} /> : <IconMoon stroke={1.5} />}
               </ActionIcon>
             )}
-
             <ActionIcon component={Link} href="/user">
               BU
             </ActionIcon>
@@ -83,19 +126,17 @@ export function AppLayout({ children }: AppLayoutProps) {
         </Group>
       </AppShell.Header>
 
+      {/* Navbar */}
       <AppShell.Navbar>
         <AppShell.Section grow my="md" component={ScrollArea} px="md">
-          <NavLink component={Link} href="/" label="Home" leftSection={<IconHomeFilled size={16} stroke={1.5} />} />
-          <NavLink component={Link} href="/portfolio" label="My Portfolio" leftSection={<IconChartDots2 size={16} stroke={1.5} />} />
-          <NavLink label="Screeners" leftSection={<IconTable size={16} stroke={1.5} />} childrenOffset={28}>
-            <NavLink component={Link} href="/stock-screener" label="Stock Screener" leftSection={<IconCurrencyDollar size={16} stroke={1.5} />} />
-            <NavLink component={Link} href="/crypto-screener" label="Crypto Screener" leftSection={<IconCoinBitcoin size={16} stroke={1.5} />} />
-          </NavLink>
-          <NavLink href="https://www.example.com/" label="Place Holder" leftSection={<IconFolderPlus size={16} stroke={1.5} />} />
+          {links.map((link) => renderNavLink(link))}
         </AppShell.Section>
       </AppShell.Navbar>
 
-      <AppShell.Main>{children}</AppShell.Main>
+      {/* Main content */}
+      <AppShell.Main>
+        <Box>{children}</Box>
+      </AppShell.Main>
     </AppShell>
   );
 }
