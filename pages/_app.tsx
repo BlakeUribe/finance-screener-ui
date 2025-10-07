@@ -3,8 +3,11 @@ import '@mantine/core/styles.css';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { MantineProvider } from '@mantine/core';
+import { theme } from '../theme'; 
+
 import { AppLayout } from '../components/AppLayout';
-import { theme } from '../theme'; // <-- import the theme
+
+
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

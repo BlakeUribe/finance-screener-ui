@@ -3,18 +3,19 @@
 import { Title, Text, Stack, Grid, Card, Group } from "@mantine/core";
 import { AreaChart } from "@mantine/charts";
 import { data } from "./data";
+import { theme } from "@/theme";
 
-// Demo AreaChart component
-const demoChart = (
+// Define color palette safely
+const successColor = theme.colors?.success?.[2] || "green";
+const failureColor = theme.colors?.danger?.[2] || "red";
+
+// Function to create a chart with a given color
+const createChart = (color: string) => (
   <AreaChart
     h={300}
     data={data}
     dataKey="date"
-    series={[
-      { name: 'Apples', color: 'indigo.6' },
-      { name: 'Oranges', color: 'blue.6' },
-      { name: 'Tomatoes', color: 'teal.6' },
-    ]}
+    series={[{ name: "Apples", color }]}
     curveType="natural"
     tickLine="x"
     withGradient={false}
@@ -22,16 +23,18 @@ const demoChart = (
   />
 );
 
-// Dashboard sections configuration
+// Dashboard sections configuration (alternate success / failure)
 const dashboardSections = [
-  { title: "Index Data", valueTitle: 'S&P500', chart: demoChart },
-  { title: "Index Data", valueTitle: 'Nasdaq', chart: demoChart },
-  { title: "Index Data", valueTitle: 'Dow', chart: demoChart },
-
-  { title: "Economic Data", valueTitle: 'Jobs', chart: demoChart },
-  { title: "Economic Data", valueTitle: 'CPI', chart: demoChart },
-  { title: "Economic Data", valueTitle: 'FedFund', chart: demoChart },
-];
+  { title: "Index Data", valueTitle: "S&P500" },
+  { title: "Index Data", valueTitle: "Nasdaq" },
+  { title: "Index Data", valueTitle: "Dow" },
+  { title: "Economic Data", valueTitle: "Jobs" },
+  { title: "Economic Data", valueTitle: "CPI" },
+  { title: "Economic Data", valueTitle: "FedFund" },
+].map((section, index) => ({
+  ...section,
+  chart: createChart(index % 2 === 0 ? successColor : failureColor),
+}));
 
 // Group sections by title
 const groupedSections = dashboardSections.reduce<Record<string, typeof dashboardSections>>(
@@ -47,7 +50,9 @@ export default function HomePage() {
   return (
     <Stack gap="xl" p="xl">
       {/* Intro Section */}
-      <Stack gap="md">
+
+      <Stack gap="xl" justify="center">
+        <Card padding="xl" >
         <Title order={1}>Hello, Welcome! 👋</Title>
         <Text size="lg">
           This app combines a stock screener and portfolio optimization. Users can select their preferred stocks and run various optimization algorithms to find the best portfolio for their needs.
@@ -55,7 +60,7 @@ export default function HomePage() {
         <Text size="md">
           On the home page we display basic index performance and economic data for a quick overview.
         </Text>
-
+        </Card>
         {/* Dashboard Grid by Section */}
         {Object.entries(groupedSections).map(([sectionTitle, cards]) => (
           <Stack key={sectionTitle} gap="md">
@@ -74,6 +79,7 @@ export default function HomePage() {
             </Grid>
           </Stack>
         ))}
+
       </Stack>
     </Stack>
   );

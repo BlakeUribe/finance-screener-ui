@@ -30,7 +30,7 @@ const tableData: TableData = {
 
 export default function ColorPage() {
   const theme = useMantineTheme();
-  const palettes = ["brand", "secondary", "danger", "warning", "success", "info"] as const;
+  const palettes = ["brand", "secondary", "danger", "warning", "success", "info", "dark", "light"] as const;
 
   return (
     <Stack gap="xl" p="xl">
