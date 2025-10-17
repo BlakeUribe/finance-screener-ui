@@ -47,8 +47,8 @@ export default function OptimizationPage() {
       </ScrollArea>
 
       <Text mt="lg" size="md" c="dimmed">
-        This output is the raw JSON returned by your Lambda (the `event` object).  
-        You can now extract and use specific fields for your visualization or analysis.
+        This output is the raw JSON returned by the Lambda (the `event` object).  
+        We can now extract and use specific fields for your visualization or analysis.
       </Text>
     </Box>
   );

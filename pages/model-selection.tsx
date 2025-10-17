@@ -4,36 +4,64 @@ import { IconInfoCircleFilled } from '@tabler/icons-react';
 import { useSelectedStocks } from '@/hooks/useSelectedStocks';
 
 const models = [
-  { name: 'CAPM', description: 'CAPM explained, and how I have it set up.', infoText: 'This text could explain how the model is set up, or link to code.' },
-  { name: 'Treynor-Black', description: 'Treynor-Black explained, and how I have it set up.', infoText: 'This text could explain how the model is set up, or link to code.' },
-  { name: 'Model 3', description: 'Description for Card 3', infoText: 'This text could explain how the model is set up, or link to code.' },
-  { name: 'Model 4', description: 'Description for Card 4', infoText: 'This text could explain how the model is set up, or link to code.' },
+  {
+    id: 'monteCarlo', // stable identifier for backend
+    name: 'Monte Carlo Sim', // display name for UI
+    description: 'Sim explained, and how I have it set up.',
+    infoText: 'This text could explain how the model is set up, or link to code.'
+  },
+  {
+    id: 'capm', // stable identifier for backend
+    name: 'CAPM', // display name for UI
+    description: 'CAPM explained, and how I have it set up.',
+    infoText: 'This text could explain how the model is set up, or link to code.'
+  },
+  {
+    id: 'treynorBlack',
+    name: 'Treynor-Black',
+    description: 'Treynor-Black explained, and how I have it set up.',
+    infoText: 'This text could explain how the model is set up, or link to code.'
+  },
+  {
+    id: 'model3',
+    name: 'Model 3',
+    description: 'Description for Card 3',
+    infoText: 'This text could explain how the model is set up, or link to code.'
+  },
+  {
+    id: 'model4',
+    name: 'Model 4',
+    description: 'Description for Card 4',
+    infoText: 'This text could explain how the model is set up, or link to code.'
+  },
 ];
 
-async function sendSelectedStocks(selectedTickers: string[]) {
-  try {
-    const res = await fetch('https://5lipli3g45.execute-api.us-west-2.amazonaws.com/prod/', {
+async function sendSelectedStocks(selectedTickers: string[], modelId: string) {
+  try { 
+    const res = await fetch('https://10gkgyx5vd.execute-api.us-west-2.amazonaws.com/prod/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tickers: selectedTickers }),
+      body: JSON.stringify({ tickers: selectedTickers, model: modelId }),
     });
 
-    if (!res.ok) throw new Error(`Error sending tickers: ${res.statusText}`);
-
-    const data = await res.json();
-
-    // Handle case where API Gateway wraps JSON as string
-    let parsedData;
+    // Always read the body
+    const text = await res.text();
+    let data;
     try {
-      parsedData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
+      data = JSON.parse(text);
     } catch {
-      parsedData = data;
+      data = text; // fallback if not JSON
     }
 
-    console.log('Full Lambda response:', data);
-    console.log('Parsed response body:', parsedData);
+    if (!res.ok) {
+      // Log server-side error
+      console.error('Server returned an error:', data);
+      throw new Error(`Error sending tickers: ${res.status} ${res.statusText}`);
+    }
 
-    return parsedData;
+    console.log('API response:', data);
+    return data;
+
   } catch (error) {
     console.error('Error in sendSelectedStocks:', error);
     return null;
@@ -44,14 +72,14 @@ export default function ModelSelectionPage() {
   const { selectedTickers } = useSelectedStocks();
   const [loading, setLoading] = useState(false);
 
-  const handleModelClick = async () => {
+  const handleModelClick = async (modelId: string) => {
     if (selectedTickers.length === 0) return;
 
     setLoading(true);
     const tickers = selectedTickers.map((s) => s.Tickers);
-    console.log('Sending selected stocks:', tickers);
+    console.log('Sending selected stocks:', tickers, 'with model:', modelId);
 
-    const result = await sendSelectedStocks(tickers);
+    const result = await sendSelectedStocks(tickers, modelId);
 
     setLoading(false);
 
@@ -101,13 +129,12 @@ export default function ModelSelectionPage() {
             <Text size="sm" c="dimmed">
               {model.description}
             </Text>
-
             <Button
               fullWidth
               mt="md"
               radius="md"
               color="blue"
-              onClick={handleModelClick}
+              onClick={() => handleModelClick(model.id)}
               disabled={loading}
             >
               {loading ? <Loader size="sm" color="white" /> : 'Use this model'}
