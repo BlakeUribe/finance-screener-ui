@@ -88,7 +88,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <AppShell
-      padding="lg"
+      // padding="lg"
       header={{ height: 60 }}
       navbar={{
         width: 175,
