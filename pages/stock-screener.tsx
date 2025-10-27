@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Stack, Button, Card, LoadingOverlay } from '@mantine/core';
+import { Stack, Button, Card, LoadingOverlay, Group, NumberFormatter } from '@mantine/core';
 import { StockFilter } from '@/components/StockFilter';
 import { DataTable } from '@/components/DataTable';
+import { PerformanceCard } from '@/components/PerformanceCard';
 import { useSelectedStocks } from '@/hooks/useSelectedStocks';
 
 interface FilterValues {
@@ -55,36 +56,56 @@ export default function StockScreener() {
       });
     });
   }, [filters, stockData]);
+  const stockMetrics = [
+    { title: "Average Volume", value: "1.2M" },
+    { title: "Average Price", value: "$245.67" },
+    { title: "52-Week Change", value: "+18.4%" },
+  ];
 
   return (
-    <Stack bg="var(--mantine-color-body)" align="center" justify="center" gap="lg">
-      <Card w="100%">
-        <StockFilter
-          data={stockData}
-          values={filters}
-          onChange={setFilters}
-        />
-      </Card>
+<Stack align="center" justify="xl" p="xl">
+  {/* Performance Cards */}
+  <Group justify="space-between" grow style={{ width: '100%' }}>
+    {stockMetrics.map((metric) => (
+      <PerformanceCard
+        key={metric.title}
+        title={metric.title}
+        value={metric.value}
+      />
+    ))}
+  </Group>
 
-      <Card w="100%" padding="xl">
-        <LoadingOverlay visible={loading} />
-        <DataTable
-          data={filteredData}
-          rowsPerPage={10}
-          selectedRows={selectedTickers} // controlled by context
-          onSelectionChange={(selected) => setSelectedTickers(selected)}
-        />
+  {/* Stock Filter */}
+  <Card style={{ width: '100%' }} p="xl">
+    <StockFilter
+      data={stockData}
+      values={filters}
+      onChange={setFilters}
+    />
+  </Card>
 
-        {selectedTickers.length > 0 && (
-          <Button
-            component="a"
-            href='model-selection'
-            onClick={() => console.log('Selected rows:', selectedTickers)}
-          >
-            Create and optimize a portfolio with my {selectedTickers.length} selected stock(s)
-          </Button>
-        )}
-      </Card>
-    </Stack>
+  {/* Data Table with Loading and Button */}
+  <Card style={{ width: '100%' }} p="xl">
+    <LoadingOverlay visible={loading} />
+    <DataTable
+      data={filteredData}
+      rowsPerPage={10}
+      selectedRows={selectedTickers}
+      onSelectionChange={(selected) => setSelectedTickers(selected)}
+    />
+
+    {selectedTickers.length > 0 && (
+      <Button
+        component="a"
+        size="lg"
+        href="model-selection"
+        mt="md"
+        onClick={() => console.log('Selected rows:', selectedTickers)}
+      >
+        Create and optimize a portfolio with my {selectedTickers.length} selected stock(s)
+      </Button>
+    )}
+  </Card>
+</Stack>
   );
 }

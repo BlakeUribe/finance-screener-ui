@@ -54,7 +54,7 @@ const quantitativeStats: { [key: string]: { min: number; max: number } } = {};
 
   return (
     <Container fluid h="100%" w="100%" p="md">
-      <Tabs defaultValue="Qualitative" color="gray" variant="outline">
+      <Tabs defaultValue="Qualitative" variant="outline">
         <Tabs.List>
           <Tabs.Tab value="Qualitative" leftSection={<IconLetterCase size={16} />}>
             Qualitative
@@ -74,10 +74,14 @@ const quantitativeStats: { [key: string]: { min: number; max: number } } = {};
               <Grid.Col span="auto" key={key}>
                 <Select
                   label={key.charAt(0).toUpperCase() + key.slice(1)} // Capitalize key for label
-                  placeholder={`Pick ${key.charAt(0).toUpperCase() + key.slice(1)}`}
+                  placeholder={`Select ${key.charAt(0).toUpperCase() + key.slice(1)}`}
                   data={uniqueQualValues[key]}
                   value={typeof values[key] === 'string' ? values[key] : undefined} // only pass string
                   onChange={(v) => handleChange(key, v)}
+                  clearable
+                  searchable
+                  nothingFoundMessage="Nothing found..."
+
                 />
               </Grid.Col>
             ))}

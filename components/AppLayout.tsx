@@ -95,6 +95,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         breakpoint: 'sm',
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
       }}
+      
     >
       {/* Header */}
       <AppShell.Header>

@@ -1,13 +1,16 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
-import { Title, Text, Stack, Grid, Card, Group, Box, Button, ThemeIcon } from "@mantine/core";
+import { Title, Text, Stack, Grid, Card, Group, Box, Button, ThemeIcon, Container, LoadingOverlay } from "@mantine/core";
 import { AreaChart } from "@mantine/charts";
-import { theme } from "@/theme";
+import { theme, defaultShade } from "@/theme";
 import { IconArrowRight, IconTrendingUp, IconShieldCheck, IconBolt } from '@tabler/icons-react';
+
+import { PerformanceCard } from "@/components/PerformanceCard";
 
 const successColor = theme.colors?.success?.[2] || "green";
 const failureColor = theme.colors?.danger?.[2] || "red";
+const brand = theme.colors?.brand || "blue"
 
 // Chart generator
 const createChart = (data: any[], seriesName: string, color: string) => (
@@ -77,6 +80,7 @@ export default function HomePage() {
     { title: "Economic Indicators", valueTitle: "Real_GDP" },
   ];
 
+  // Map sections to charts
   const mapSections = (sections: typeof indexSections | typeof econSections, data: any[], loading: boolean) =>
     sections.map((section, idx) => ({
       ...section,
@@ -105,134 +109,88 @@ export default function HomePage() {
     },
     {}
   );
+  type IndexKey = "S&P500" | "Nasdaq" | "Dow_Jones";
+  type EconKey = "Fed_Funds" | "CPI" | "Unemployment_Rate" | "Real_GDP";
 
-  const latestIndexValues = indexData.length
-    ? {
-      "S&P500": indexData[indexData.length - 1]["S&P500"],
-      Nasdaq: indexData[indexData.length - 1]["Nasdaq"],
-      Dow_Jones: indexData[indexData.length - 1]["Dow_Jones"],
-    }
-    : { "S&P500": null, Nasdaq: null, Dow_Jones: null };
+  // Unified key type
+  type DashboardKey = IndexKey | EconKey;
+
+  // Unified latest values object
+  const latestValues: Record<DashboardKey, number | null> = {
+    "S&P500": indexData.length ? indexData[indexData.length - 1]["S&P500"] : null,
+    Nasdaq: indexData.length ? indexData[indexData.length - 1]["Nasdaq"] : null,
+    Dow_Jones: indexData.length ? indexData[indexData.length - 1]["Dow_Jones"] : null,
+    Fed_Funds: econData.length ? econData[econData.length - 1]["Fed_Funds"] : null,
+    CPI: econData.length ? econData[econData.length - 1]["CPI"] : null,
+    Unemployment_Rate: econData.length ? econData[econData.length - 1]["Unemployment_Rate"] : null,
+    Real_GDP: econData.length ? econData[econData.length - 1]["Real_GDP"] : null,
+  };
+
+  const dashboardCards: { title: string; key: DashboardKey }[] = [
+    { title: "S&P 500", key: "S&P500" },
+    { title: "Nasdaq", key: "Nasdaq" },
+    { title: "Dow Jones", key: "Dow_Jones" },
+    { title: "Fed Funds Rate", key: "Fed_Funds" },
+    // Add/remove any other indicators dynamically
+  ];
 
   return (
     <div>
       {/* Top section with a different color */}
-      <div>
-        <Box
-          w="100%"
-          bg="blue"
-          c="white"
-          py="xl"
-          px="lg"
-          ta="center"
-        >
-          <Group
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "center",
-            }}
-          >
-            <Title order={1}>Smart Portfolio Optimization</Title>
-            <Title order={1}>Made Simple</Title>
-            <Text>
-              Screen thousands of portfolios and optimize your investments with real-time economic data.
-            </Text>
-            <Text>
-              Make informed decisions backed by comprehensive market analysis and cutting-edge algorithms.
+      <Box w="100%" bg={brand[defaultShade]} py="xl" >
+        <Container c="white" p="lg">
+          {/* Titles and Intro */}
+          <Title order={1}>Smart Portfolio Optimization</Title>
+          <Title order={1}>Made Simple</Title>
+          <Text>
+            Screen thousands of portfolios and optimize your investments with real-time economic data.
+          </Text>
+          <Text>
+            Make informed decisions backed by comprehensive market analysis and cutting-edge algorithms.
+          </Text>
+          <Text size="md">
+            Quick overview of major indexes and economic indicators
+          </Text>
 
-            </Text>
-            <Text size="md">
-              Quick overview of major indexes and economic indicators
-            </Text>
-
-            {/* Buttons beside each other */}
-            <Group gap="md">
-              <Button rightSection={<IconArrowRight size={14} />}
-              >Get Started</Button>
-              <Button variant="light">Learn More</Button>
-            </Group>
-            <Group gap="xl" justify="center">
-              {/* Feature 1 */}
-              <Group gap="sm">
-                <ThemeIcon color="indigo" size="xl">
-                  <IconTrendingUp size={24} />
-                </ThemeIcon>
-                <div>
-                  <Text size="sm" fw={500}>Real-time Analysis</Text>
-                  <Text size="xs" >Live Market Data</Text>
-                </div>
-              </Group>
-
-              {/* Feature 2 */}
-              <Group gap="sm">
-                <ThemeIcon color="indigo" size="xl">
-                  <IconShieldCheck size={24} />
-                </ThemeIcon>
-                <div>
-                  <Text size="sm" fw={500}>Secure Insights</Text>
-                  <Text size="xs">Protected Analytics</Text>
-                </div>
-              </Group>
-
-              {/* Feature 3 */}
-              <Group gap="sm">
-                <ThemeIcon color="indigo" size="xl">
-                  <IconBolt size={24} />
-                </ThemeIcon>
-                <div>
-                  <Text size="sm" fw={500}>High Performance</Text>
-                  <Text size="xs">Optimized Computation</Text>
-                </div>
-              </Group>
-            </Group>
+          {/* Buttons */}
+          <Group gap="md" mt="md">
+            <Button variant="defualt" rightSection={<IconArrowRight size={24} />} size="lg">Get Started</Button>
+            <Button variant="outline"size="lg">Learn More</Button>
           </Group>
-        </Box>
-      </div>
 
+          {/* Features */}
+          <Group gap="2xl" justify="center" mt="xl" grow>
+            {[
+              { icon: IconTrendingUp, title: "Real-time Analysis", subtitle: "Live Market Data" },
+              { icon: IconShieldCheck, title: "Secure Insights", subtitle: "Protected Analytics" },
+              { icon: IconBolt, title: "High Performance", subtitle: "Optimized Computation" },
+            ].map((feature) => (
+              <Group key={feature.title} gap="md" align="center">
+                <ThemeIcon color="indigo" size={64} radius="md">
+                  <feature.icon size={32} />
+                </ThemeIcon>
+                <div>
+                  <Text size="lg" fw={600}>{feature.title}</Text>
+                  <Text size="md">{feature.subtitle}</Text>
+                </div>
+              </Group>
+            ))}
+          </Group>
+        </Container>
+      </Box>
 
       <Stack gap="xl" p="xl">
         <Stack gap="xl" justify="center">
-
-
           {/* Most Recent Index Values */}
           <Group grow>
-            {/* S&P 500 */}
-            <Card>
-              <Text size="sm">S&P 500</Text>
-              <Text fw={600} fz="lg">
-                {latestIndexValues["S&P500"]?.toFixed(2)}
-              </Text>
-              <IconTrendingUp color="green" size={20} />
-              <Text size="xs" c="dimmed">
-                Last updated: 2 hours ago
-              </Text>
-            </Card>
+            {dashboardCards.map((card) => (
+<PerformanceCard
+  title={card.title}
+  value={
+    latestValues[card.key] ?? null  }
+/>
+            ))}
 
-            {/* Nasdaq */}
-            <Card>
-              <Text size="sm">Nasdaq</Text>
-              <Text fw={600} fz="lg">
-                {latestIndexValues["Nasdaq"]?.toFixed(2)}
-              </Text>
-              <IconTrendingUp color="green" size={20} />
-              <Text size="xs" c="dimmed">
-                Last updated: 2 hours ago
-              </Text>
-            </Card>
-
-            {/* Dow Jones */}
-            <Card>
-              <Text size="sm">Dow Jones</Text>
-              <Text fw={600} fz="lg">
-                {latestIndexValues["Dow_Jones"]?.toFixed(2)}
-              </Text>
-              <IconTrendingUp color="green" size={20} />
-              <Text size="xs" c="dimmed">
-                Last updated: 2 hours ago
-              </Text>
-            </Card>
           </Group>
 
           {/* Dashboard Grid */}

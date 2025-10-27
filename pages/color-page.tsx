@@ -30,7 +30,7 @@ const tableData: TableData = {
 
 export default function ColorPage() {
   const theme = useMantineTheme();
-  const palettes = ["brand", "secondary", "danger", "warning", "success", "info", "dark", "light"] as const;
+  const palettes = ["brand", "secondary", "danger", "warning", "success", "dark", "light"] as const;
 
   return (
     <Stack gap="xl" p="xl">
@@ -48,13 +48,16 @@ export default function ColorPage() {
                 key={i}
                 w={60}
                 h={60}
+
                 style={{
                   backgroundColor: shade,
                   borderRadius: "0.5rem",
-                  border: `2px solid rgba(0,0,0,0.15)`,
+                  // border: `2px solid rgba(0,0,0,0.15)`,
                   transition: "all 0.2s ease",
                 }}
-              />
+              >
+                <Text>{i}</Text>
+              </Box>
             ))}
           </Group>
 
@@ -68,8 +71,6 @@ export default function ColorPage() {
               icon={
                 name === "success"
                   ? <IconCheck size={16} />
-                  : name === "info"
-                  ? <IconInfoCircle size={16} />
                   : <IconAlertCircle size={16} />
               }
               w={260}
@@ -95,6 +96,15 @@ export default function ColorPage() {
         <Table withTableBorder highlightOnHover data={tableData}>
         </Table>
       </Stack>
+
+      <Stack gap="sm" mt="xl">
+        <Text fw={700}>Table in Card Preview</Text>
+        <Card shadow="sm" p="lg" radius="md" withBorder>
+          <Table withTableBorder highlightOnHover data={tableData}>
+          </Table>
+        </Card>
+      </Stack>
+
     </Stack>
   );
 }
