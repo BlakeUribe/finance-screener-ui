@@ -64,21 +64,21 @@ export const theme: MantineThemeOverride = {
   },
 
   components: {
-  Button: {
-    styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }, params: { color: any, variant?: string }) => ({
-      root: {
-        backgroundColor: theme.colors[params.color || "brand"][defaultShade],
-        border: `${borderThickness} solid ${theme.colors[params.color || "brand"][defaultShade]}`,
-        boxShadow: `${shadowOffset} ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
-        color: theme.colors.white[0],
-        transition: "all 0.2s ease",
-        "&:hover": {
-          backgroundColor: theme.colors[params.color || "brand"][buttonHoverShade],
-          boxShadow: `0 4px 10px ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
-        },
-      }
-    }),
-  },
+    Button: {
+      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }, params: { color: any, variant?: string }) => ({
+        root: {
+          backgroundColor: theme.colors[params.color || "brand"][defaultShade],
+          border: `${borderThickness} solid ${theme.colors[params.color || "brand"][defaultShade]}`,
+          boxShadow: `${shadowOffset} ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
+          color: theme.colors.white[0],
+          transition: "all 0.2s ease",
+          "&:hover": {
+            backgroundColor: theme.colors[params.color || "brand"][buttonHoverShade],
+            boxShadow: `0 4px 10px ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
+          },
+        }
+      }),
+    },
     Badge: {
       styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }, params: { color: any }) => ({
         root: {
@@ -135,6 +135,23 @@ export const theme: MantineThemeOverride = {
           transition: 'all 0.2s ease'
         }
       })
-    }
+    },
+    LoadingOverlay: {
+      defaultProps: {
+        overlayBlur: 2,
+        zIndex: 1000,
+        loaderProps: { color: 'brand', type: 'bars' },
+      },
+      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }) => ({
+        root: {
+          // backgroundColor:
+          //   theme.colorScheme === 'dark'
+          //     ? theme.colors.dark?.[6] || '#1A1B1E'
+          //     : theme.colors.gray?.[0] || '#F8F9FA',
+          // borderRadius: '0.5rem',
+          // transition: 'all 0.2s ease-in-out',
+        },
+      }),
+    },
   }
 };

@@ -57,9 +57,9 @@ export default function StockScreener() {
     });
   }, [filters, stockData]);
   const stockMetrics = [
-    { title: "Average Volume", value: "1.2M" },
-    { title: "Average Price", value: "$245.67" },
-    { title: "52-Week Change", value: "+18.4%" },
+    { title: "Average Volume X", value: "1.2M X" },
+    { title: "Average Price X", value: "$245.67 X" },
+    { title: "52-Week Change X", value: "+18.4% X" },
   ];
 
   return (

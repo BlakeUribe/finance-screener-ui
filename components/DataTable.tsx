@@ -48,6 +48,7 @@ interface DataTableProps<T extends Record<string, any>> {
   data: T[];
   n_unique_for_badge?: number;
   rowsPerPage?: number;
+  selectable?: boolean;            // new prop
   selectedRows?: T[];
   onSelectionChange?: (selected: T[]) => void;
 }
@@ -56,6 +57,8 @@ export function DataTable<T extends Record<string, any>>({
   data,
   n_unique_for_badge = 15,
   rowsPerPage = 10,
+  selectable = true,              // default false
+
   selectedRows = [],
   onSelectionChange,
 }: DataTableProps<T>) {
@@ -73,27 +76,29 @@ export function DataTable<T extends Record<string, any>>({
 
   const sortedData = sortBy
     ? [...filteredData].sort((a, b) => {
-        const aVal = String(a[sortBy]);
-        const bVal = String(b[sortBy]);
-        return reverseSort ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
-      })
+      const aVal = String(a[sortBy]);
+      const bVal = String(b[sortBy]);
+      return reverseSort ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+    })
     : filteredData;
 
   const paginatedData = sortedData.slice((activePage - 1) * rowsPerPage, activePage * rowsPerPage);
 
   const toggleRow = (row: T) => {
+    if (!selectable) return;
     const exists = selectedRows.includes(row);
+
     const newSelected = exists ? selectedRows.filter(r => r !== row) : [...selectedRows, row];
     onSelectionChange?.(newSelected);
   };
 
   const keys = data[0] ? (Object.keys(data[0]) as (keyof T)[]) : [];
 
-const uniqueCounts: Record<string, number> = {};
-keys.forEach(key => {
-  const uniques = new Set(data.map(row => row[key]));
-  uniqueCounts[String(key)] = uniques.size; // cast key to string here
-});
+  const uniqueCounts: Record<string, number> = {};
+  keys.forEach(key => {
+    const uniques = new Set(data.map(row => row[key]));
+    uniqueCounts[String(key)] = uniques.size; // cast key to string here
+  });
   return (
     <ScrollArea>
       <TextInput
@@ -150,16 +155,16 @@ keys.forEach(key => {
                 // Use NumberFormatter only for numbers
                 return (
 
-<Table.Td key={String(key)}>
-  {typeof value === 'number' ? (
-    <NumberFormatter value={value} thousandSeparator decimalScale={2} />
-  ) : uniqueCounts[String(key)] < n_unique_for_badge ? (  // cast key to string here too
-    <Badge variant="outline">{String(value)}</Badge>
-  ) : (
-    String(value)
-  )}
-</Table.Td>
-                
+                  <Table.Td key={String(key)}>
+                    {typeof value === 'number' ? (
+                      <NumberFormatter value={value} thousandSeparator decimalScale={2} />
+                    ) : uniqueCounts[String(key)] < n_unique_for_badge ? (  // cast key to string here too
+                      <Badge variant="outline">{String(value)}</Badge>
+                    ) : (
+                      String(value)
+                    )}
+                  </Table.Td>
+
                 );
               })}
             </Table.Tr>

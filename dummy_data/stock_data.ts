@@ -20,3 +20,36 @@ export const stockData = [
   { ticker: 'ORCL', title: 'Oracle Corp.', sector: 'Technology', profitMargin: 0.30, pe: 19, marketCap: 250 },
   { ticker: 'BA', title: 'Boeing Co.', sector: 'Industrials', profitMargin: 0.05, pe: 20, marketCap: 150 },
 ];
+
+export const dummyData = [
+  {
+    date: 'Mar 22',
+    Apples: 2890,
+    Oranges: 2338,
+    Tomatoes: 2452,
+  },
+  {
+    date: 'Mar 23',
+    Apples: 2756,
+    Oranges: 2103,
+    Tomatoes: 2402,
+  },
+  {
+    date: 'Mar 24',
+    Apples: 3322,
+    Oranges: 986,
+    Tomatoes: 1821,
+  },
+  {
+    date: 'Mar 25',
+    Apples: 3470,
+    Oranges: 2108,
+    Tomatoes: 2809,
+  },
+  {
+    date: 'Mar 26',
+    Apples: 3129,
+    Oranges: 1726,
+    Tomatoes: 2290,
+  },
+];

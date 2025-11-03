@@ -21,17 +21,19 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@mantine/charts": "^8.3.2",
-    "@mantine/core": "^8.3.2",
+    "@mantine/charts": "^8.3.5",
+    "@mantine/core": "^8.3.5",
+    "@mantine/dates": "^8.3.5",
     "@mantine/hooks": "^8.3.2",
     "@next/bundle-analyzer": "^15.5.3",
     "@tabler/icons-react": "^3.34.1",
+    "dayjs": "^1.11.18",
     "next": "15.5.3",
     "papaparse": "^5.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.9.1",
-    "recharts": "^3.2.1"
+    "recharts": "^3.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

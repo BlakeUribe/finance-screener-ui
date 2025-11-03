@@ -155,7 +155,7 @@ export default function HomePage() {
           {/* Buttons */}
           <Group gap="md" mt="md">
             <Button variant="defualt" rightSection={<IconArrowRight size={24} />} size="lg">Get Started</Button>
-            <Button variant="outline"size="lg">Learn More</Button>
+            <Button variant="outline" size="lg">Learn More</Button>
           </Group>
 
           {/* Features */}
@@ -184,11 +184,12 @@ export default function HomePage() {
           {/* Most Recent Index Values */}
           <Group grow>
             {dashboardCards.map((card) => (
-<PerformanceCard
-  title={card.title}
-  value={
-    latestValues[card.key] ?? null  }
-/>
+              <PerformanceCard
+                title={card.title}
+                value={
+                  latestValues[card.key] ?? null}
+                  isUp={true}
+              />
             ))}
 
           </Group>
