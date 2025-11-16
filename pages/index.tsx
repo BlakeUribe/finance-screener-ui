@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Title, Text, Stack, Grid, Card, Group, Box, Button, ThemeIcon, Container, LoadingOverlay } from "@mantine/core";
+import { Title, Text, Stack, Grid, Card, Group, Box, Button, ThemeIcon, Container } from "@mantine/core";
 import { AreaChart } from "@mantine/charts";
 import { theme, defaultShade } from "@/theme";
 import { IconArrowRight, IconTrendingUp, IconShieldCheck, IconBolt } from '@tabler/icons-react';
@@ -138,24 +138,27 @@ export default function HomePage() {
     <div>
       {/* Top section with a different color */}
       <Box w="100%" bg={brand[defaultShade]} py="xl" >
+        {/* <Box w="100%"  py="xl" > */}
+
         <Container c="white" p="lg">
           {/* Titles and Intro */}
           <Title order={1}>Smart Portfolio Optimization</Title>
           <Title order={1}>Made Simple</Title>
           <Text>
-            Screen thousands of portfolios and optimize your investments with real-time economic data.
+            Screen many portfolios and optimize your investments with real-time economic data.
           </Text>
           <Text>
             Make informed decisions backed by comprehensive market analysis and cutting-edge algorithms.
           </Text>
-          <Text size="md">
-            Quick overview of major indexes and economic indicators
-          </Text>
 
           {/* Buttons */}
           <Group gap="md" mt="md">
-            <Button variant="defualt" rightSection={<IconArrowRight size={24} />} size="lg">Get Started</Button>
-            <Button variant="outline" size="lg">Learn More</Button>
+            <Button variant="filledAlt" component="a" href="/stock-screener" rightSection={<IconArrowRight size={24} />} size="lg">
+              Get Started
+            </Button>
+            <Button variant="alt" component="a" href="/user-guide" size="lg">
+              Learn More
+            </Button>
           </Group>
 
           {/* Features */}
@@ -188,7 +191,7 @@ export default function HomePage() {
                 title={card.title}
                 value={
                   latestValues[card.key] ?? null}
-                  isUp={true}
+                isUp={true}
               />
             ))}
 

@@ -124,7 +124,7 @@ export default function ModelSelectionPage() {
   return (
     <Container fluid>
 
-      {/* Full-screen overlay */}
+      {/* Need to make this Full-screen overlay */}
       <LoadingOverlay
         visible={loading}
         overlayProps={{ radius: "sm", blur: 2 }}
@@ -139,12 +139,17 @@ export default function ModelSelectionPage() {
               Selected Stocks
             </Title>
 
+
             <Stack>
-              {selectedTickers.map((stock, idx) => (
-                <Card key={idx} padding="sm" >
-                  <Text fw={500}>{stock.Tickers}</Text>
-                  <Text>Company Name</Text>
-                  <Text>Price</Text>
+              {selectedTickers.map((selectedStock, idx) => (
+                <Card key={idx} padding="sm">
+                  <Badge size="lg">
+                    {selectedStock.Tickers}
+                  </Badge>
+                  <Text mt="sm">{selectedStock.Company}</Text>
+                  <Text>
+                    {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(selectedStock.Close)}
+                  </Text>
                 </Card>
               ))}
             </Stack>

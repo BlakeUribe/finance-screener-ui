@@ -64,20 +64,86 @@ export const theme: MantineThemeOverride = {
   },
 
   components: {
+
     Button: {
-      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }, params: { color: any, variant?: string }) => ({
-        root: {
-          backgroundColor: theme.colors[params.color || "brand"][defaultShade],
-          border: `${borderThickness} solid ${theme.colors[params.color || "brand"][defaultShade]}`,
-          boxShadow: `${shadowOffset} ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
-          color: theme.colors.white[0],
-          transition: "all 0.2s ease",
-          "&:hover": {
-            backgroundColor: theme.colors[params.color || "brand"][buttonHoverShade],
-            boxShadow: `0 4px 10px ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
-          },
+      styles: (
+        theme: { colors: { [x: string]: any[] }; colorScheme: string },
+        params: { color: any; variant?: string }
+      ) => {
+        const bgColor = theme.colors[params.color || "brand"][defaultShade];
+        const hoverColor = theme.colors[params.color || "brand"][buttonHoverShade];
+        const shadow = theme.colorScheme === "dark" ? shadowColorDark : shadowColorLight;
+
+        // Alt variant: brand background, white text + border
+        if (params.variant === "alt") {
+          return {
+            root: {
+              backgroundColor: bgColor,
+              border: `${borderThickness} solid ${theme.colors.white[0]}`,
+              boxShadow: `${shadowOffset} ${shadow}`,
+              color: theme.colors.white[0],
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: hoverColor,
+                boxShadow: `0 4px 10px ${shadow}`,
+                color: theme.colors.white[0],
+              },
+            },
+          };
         }
-      }),
+
+        // DefaultAlt variant: same as alt (kept for backward compatibility)
+        if (params.variant === "defaultAlt") {
+          return {
+            root: {
+              backgroundColor: bgColor,
+              border: `${borderThickness} solid ${theme.colors.white[0]}`,
+              boxShadow: `${shadowOffset} ${shadow}`,
+              color: theme.colors.white[0],
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: hoverColor,
+                boxShadow: `0 4px 10px ${shadow}`,
+                color: theme.colors.white[0],
+              },
+            },
+          };
+        }
+
+        // FilledAlt variant: white background, brand text
+        if (params.variant === "filledAlt") {
+          return {
+            root: {
+              backgroundColor: theme.colors.white[0],
+              border: `${borderThickness} solid ${theme.colors.white[0]}`,
+              boxShadow: `${shadowOffset} ${shadow}`,
+              color: bgColor,
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: "#f7f7f7", // slightly off-white for hover
+                boxShadow: `0 4px 10px ${shadow}`,
+                color: hoverColor,
+              },
+            },
+          };
+        }
+
+        // Existing default/outline logic
+        return {
+          root: {
+            backgroundColor: params.variant === "outline" ? "transparent" : bgColor,
+            border: `${borderThickness} solid ${bgColor}`,
+            boxShadow: `${shadowOffset} ${shadow}`,
+            color: params.variant === "outline" ? bgColor : theme.colors.white[0],
+            transition: "all 0.2s ease",
+            "&:hover": {
+              backgroundColor: hoverColor,
+              color: params.variant === "outline" ? theme.colors.white[0] : theme.colors.white[0],
+              boxShadow: `0 4px 10px ${shadow}`,
+            },
+          },
+        };
+      },
     },
     Badge: {
       styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }, params: { color: any }) => ({

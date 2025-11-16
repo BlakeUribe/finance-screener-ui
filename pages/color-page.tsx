@@ -13,7 +13,7 @@ import {
   Table,
   TableData
 } from "@mantine/core";
-import { IconAlertCircle, IconCheck, IconInfoCircle } from "@tabler/icons-react";
+import { IconAlertCircle, IconCheck } from "@tabler/icons-react";
 
 const tableData: TableData = {
   caption: 'Some elements from periodic table',
@@ -103,6 +103,19 @@ export default function ColorPage() {
           <Table withTableBorder highlightOnHover data={tableData}>
           </Table>
         </Card>
+      </Stack>
+      <Stack>
+
+        <Button>
+          Defualt
+        </Button>
+        <Button variant="outline">
+          Outline
+        </Button>
+        <Button variant="filledAlt">
+          White Background w Brand colors
+        </Button>
+
       </Stack>
 
     </Stack>

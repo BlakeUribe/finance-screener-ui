@@ -1,4 +1,4 @@
-import { Container, Grid, Select, Tabs, Slider, RangeSlider, Text } from '@mantine/core';
+import { Container, Grid, Select, Tabs, Stack, RangeSlider, Text } from '@mantine/core';
 import { IconLetterCase, IconMathXDivideY2, IconSettings } from '@tabler/icons-react';
 
 type FilterValues = { [key: string]: string | number | [number, number] | undefined };
@@ -35,7 +35,7 @@ export function StockFilter({ data, values, onChange }: StockFilterProps) {
   });
 
   // Compute min and max for each quantitative field
-const quantitativeStats: { [key: string]: { min: number; max: number } } = {};
+  const quantitativeStats: { [key: string]: { min: number; max: number } } = {};
 
   quantitativeFields.forEach((key) => {
     // Collect all numeric values and filter out null/undefined
@@ -89,33 +89,44 @@ const quantitativeStats: { [key: string]: { min: number; max: number } } = {};
         </Tabs.Panel>
 
         {/* KPI Filters */}
-      <Tabs.Panel value="Quantitative" pt="md">
-        <Grid grow gutter="lg">
-          {quantitativeFields.map((key) => (
-            <Grid.Col span="auto" key={key}>
-              <Text>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+        <Tabs.Panel value="Quantitative" pt="lg">
+          <Grid justify="space-between" grow gutter="xl">
+            {quantitativeFields.map((key) => (
+              <Grid.Col span={4} key={key}>
+                <Text>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
 
-{/* Issue with reading decimals */}
                 <RangeSlider
                   min={quantitativeStats[key].min}
                   max={quantitativeStats[key].max}
-                  minRange={0.00}
-                  step={0.01} // set step for decimals
+                  minRange={0}
+                  step={0.01}
                   value={
                     Array.isArray(values[key])
                       ? (values[key] as [number, number])
                       : [quantitativeStats[key].min, quantitativeStats[key].max]
                   }
                   onChange={(v: [number, number]) => handleChange(key, v)}
-                  marks={[
-                    { value: quantitativeStats[key].min, label: `${quantitativeStats[key].min}` },
-                    { value: quantitativeStats[key].max, label: `${quantitativeStats[key].max}` },
-                  ]}
+                  label={(val) =>
+                    new Intl.NumberFormat("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(val)
+                  }
+                // marks={[
+                //   {
+                //     value: quantitativeStats[key].min,
+                //     label: `${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(quantitativeStats[key].min)}`
+                //   },
+                //   {
+                //     value: quantitativeStats[key].max,
+                //     label: `${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(quantitativeStats[key].max)}`
+                //   },
+                // ]} // Marks is cool but takes up too much room in range slide
                 />
 
-            </Grid.Col>
-          ))}
-        </Grid>
+              </Grid.Col>
+            ))}
+          </Grid>
         </Tabs.Panel>
 
       </Tabs>

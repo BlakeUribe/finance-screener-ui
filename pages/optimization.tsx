@@ -30,6 +30,7 @@ import {
 import { theme, defaultShade } from '@/theme';
 import { DataTable } from '@/components/DataTable';
 import { PerformanceCard } from '@/components/PerformanceCard';
+import { ExportButton } from '@/components/ExportButton';
 
 // const brand = theme.colors.brand[defaultShade!];
 
@@ -143,23 +144,6 @@ export default function OptimizationPage() {
     value: d.Portfolio_Returns < 0 ? d.Portfolio_Returns : null, // exclude 0
   }));
 
-const data01 = [
-  { x: 100, y: 200, z: 200 },
-  { x: 120, y: 100, z: 260 },
-  { x: 170, y: 300, z: 400 },
-  { x: 140, y: 250, z: 280 },
-  { x: 150, y: 400, z: 500 },
-  { x: 110, y: 280, z: 200 },
-];
-
-const data02 = [
-  { x: 200, y: 260, z: 240 },
-  { x: 240, y: 290, z: 220 },
-  { x: 190, y: 290, z: 250 },
-  { x: 198, y: 250, z: 210 },
-  { x: 180, y: 280, z: 260 },
-  { x: 210, y: 220, z: 230 },
-];
 
   return (
     <Container size="lg" my="md">
@@ -230,47 +214,48 @@ const data02 = [
             Portfolio Holdings
           </Text>
           <DataTable data={holdingsData} rowsPerPage={10} selectable={false} />
+
         </Card>
 
         <Card>
 
-<ScatterChart
-  style={{ width: '100%', height: 500 }}
-  margin={{ top: 20, right: 20, bottom: 10, left: 10 }}
->
-  <CartesianGrid strokeDasharray="3 3" />
+          <ScatterChart
+            style={{ width: '100%', height: 500 }}
+            margin={{ top: 20, right: 20, bottom: 10, left: 10 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
 
-  {/* Common axes */}
-  <XAxis type="number" dataKey="portfolio_std" name="Risk (Std Dev)" unit="" />
-  <YAxis type="number" dataKey="portfolio_ret" name="Return" unit="" />
+            <XAxis type="number" dataKey="portfolio_std" name="Risk (Std Dev)" unit="" />
+            <YAxis type="number" dataKey="portfolio_ret" name="Return" unit="" />
 
-  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
 
-  {/* Map your distinct_portfolios to unified keys */}
-<Scatter
-  name="Distinct Portfolios"
-  data={data?.distinct_portfolios}
-  fill="#8884d8"
-/>
+            <Scatter
+              name="Distinct Portfolios"
+              data={data?.distinct_portfolios.slice(0, 5)} // only first 5 points
+              fill="#8884d8"
+            />
 
-<Scatter
-  name="Frontier Portfolios"
-  data={data?.frontier_portfolios}
-  fill="#82ca9d"
-/>
-<ReferenceLine y={0.2} stroke="blue"/>
-</ScatterChart>
+            <Scatter
+              name="Frontier Portfolios"
+              data={data?.frontier_portfolios.slice(0, 5)}
+              fill="#82ca9d"
+            />
+            <ReferenceLine y={0.2} stroke="blue" />
+          </ScatterChart>
 
         </Card>
-        <Button rightSection={<IconDownload />}>Export Results</Button>
+
+
+        <ExportButton data={holdingsData} />
+
       </Stack>
 
-      <ScrollArea h={300} offsetScrollbars mt="md">
-
+      {/* <ScrollArea h={300} offsetScrollbars mt="md">
         <Code block>{JSON.stringify(data, null, 2)}</Code>
         <Code block>{JSON.stringify(backtestResult.slice(0, 5), null, 2)}</Code>
+      </ScrollArea> */}
 
-      </ScrollArea>
     </Container>
   );
 }

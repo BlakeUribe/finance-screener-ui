@@ -12,6 +12,8 @@ import {
   ActionIcon,
   useMantineColorScheme,
   Box,
+  Stack,
+  Flex
 } from '@mantine/core';
 
 import {
@@ -24,6 +26,10 @@ import {
   IconCurrencyDollar,
   IconCoinBitcoin,
   IconRainbow,
+  IconHexagon3d, //IconDeviceAnalytics also cool design
+  IconUserHexagon,
+  IconSettings,
+  IconBell
 } from '@tabler/icons-react';
 
 import Link from 'next/link';
@@ -37,16 +43,8 @@ interface AppLayoutProps {
 const links = [
   { label: 'Home', href: '/', icon: <IconHomeFilled size={16} /> },
   { label: 'Portfolio', href: '/portfolio', icon: <IconChartDots2 size={16} /> },
-  {
-    label: 'Screeners',
-    icon: <IconTable size={16} />,
-    children: [
-      { label: 'Stock Screener', href: '/stock-screener', icon: <IconCurrencyDollar size={16} /> },
-      { label: 'Crypto Screener', href: '/crypto-screener', icon: <IconCoinBitcoin size={16} /> },
-    ],
-  },
-  { label: 'Colors', href: '/color-page', icon: <IconRainbow size={16} /> },
-  { label: 'Place Holder', href: '/placeholder', icon: <IconFolderPlus size={16} /> },
+  { label: 'Stock Screener', href: '/stock-screener', icon: <IconTable size={16} /> },
+  { label: 'Brand Theme', href: '/color-page', icon: <IconRainbow size={16} /> },
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -68,6 +66,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           label={link.label}
           leftSection={link.icon}
           childrenOffset={28}
+          variant="subtle"
         >
           {link.children.map((child: any) => renderNavLink(child))}
         </NavLink>
@@ -82,6 +81,10 @@ export function AppLayout({ children }: AppLayoutProps) {
         label={link.label}
         leftSection={link.icon}
         active={pathname === link.href}
+        variant={pathname === link.href ? "filled" : "subtle"}
+        style={(theme) => ({
+          borderRadius: theme.radius.md,
+        })}
       />
     );
   };
@@ -95,22 +98,30 @@ export function AppLayout({ children }: AppLayoutProps) {
         breakpoint: 'sm',
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
       }}
-      
+
     >
       {/* Header */}
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
-          <Group>
+          <Flex align="center" gap="md">
             {mounted && (
               <>
-                <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-                <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
+                <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="xs" size="sm" />
+                <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="xs" size="sm" />
               </>
             )}
-            <Title order={1}>My Finance Screener</Title>
-          </Group>
+
+            <Flex align="center" gap="sm">
+              <IconHexagon3d size={38} />
+              <Title order={1}>OptimizerLab</Title>
+            </Flex>
+          </Flex>
 
           <Group>
+            <IconBell>
+
+            </IconBell>
+
             {mounted && (
               <ActionIcon
                 onClick={() => setColorScheme(colorScheme === 'light' ? 'dark' : 'light')}
@@ -120,9 +131,8 @@ export function AppLayout({ children }: AppLayoutProps) {
                 {colorScheme === 'light' ? <IconSun stroke={1.5} /> : <IconMoon stroke={1.5} />}
               </ActionIcon>
             )}
-            <ActionIcon component={Link} href="/user">
-              BU
-            </ActionIcon>
+
+
           </Group>
         </Group>
       </AppShell.Header>
@@ -132,6 +142,36 @@ export function AppLayout({ children }: AppLayoutProps) {
         <AppShell.Section grow my="md" component={ScrollArea} px="md">
           {links.map((link) => renderNavLink(link))}
         </AppShell.Section>
+
+        <AppShell.Section my="md" px="md">
+          <Stack gap={8}>
+
+            <NavLink
+              label="Settings"
+              leftSection={<IconSettings size={18} />}
+              component={Link}
+              href="/settings"
+              variant="subtle"
+              style={(theme) => ({
+                borderRadius: theme.radius.md,
+              })}
+            />
+            <NavLink
+              label="John Doe"
+              leftSection={<IconUserHexagon size={18} />}
+              component={Link}
+              href="/user"
+              variant="subtle"
+              style={(theme) => ({
+                borderRadius: theme.radius.md,
+              })}
+            />
+
+
+          </Stack>
+        </AppShell.Section>
+
+
       </AppShell.Navbar>
 
       {/* Main content */}

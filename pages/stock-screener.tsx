@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Stack, Button, Card, LoadingOverlay, Group, NumberFormatter } from '@mantine/core';
+import { Stack, Button, Card, LoadingOverlay, Group, ScrollArea, Code } from '@mantine/core';
 import { StockFilter } from '@/components/StockFilter';
 import { DataTable } from '@/components/DataTable';
 import { PerformanceCard } from '@/components/PerformanceCard';
@@ -56,56 +56,109 @@ export default function StockScreener() {
       });
     });
   }, [filters, stockData]);
-  const stockMetrics = [
-    { title: "Average Volume X", value: "1.2M X" },
-    { title: "Average Price X", value: "$245.67 X" },
-    { title: "52-Week Change X", value: "+18.4% X" },
+  const desiredCols: { key: string; label?: string }[] = [
+    { key: "Tickers" },
+    { key: "Company" },
+    { key: "Sector" },
+    { key: "Industry" },
+    { key: "Close" },
+    { key: "Volume" },
+    { key: "Index" },
+    { key: "forwardPE", label: "PE" },
+    { key: "profitMargins", label: "Profit" },
+    { key: "trailingEps", label: "EPS" },
+
   ];
+  const mappedData = useMemo(() => {
+    return filteredData.map((item) => {
+      const newItem: Record<string, any> = {};
+      desiredCols.forEach(({ key, label }) => {
+        if (key in item) newItem[label || key] = item[key];
+      });
+      return newItem;
+    });
+  }, [filteredData]);
 
+  const stockMetrics = useMemo(() => {
+    if (!filteredData || filteredData.length === 0) return [];
+
+    const totalVolume = filteredData.reduce((acc, stock) => acc + (stock.Volume || 0), 0);
+    const avgVolume = totalVolume / filteredData.length;
+
+    const totalPrice = filteredData.reduce((acc, stock) => acc + (stock.Close || 0), 0);
+    const avgPrice = totalPrice / filteredData.length;
+
+    // Average profit margin
+    const totalProfitMargin = filteredData.reduce((acc, stock) => acc + (stock.profitMargins || 0), 0);
+    const avgProfitMargin = filteredData.length > 0 ? totalProfitMargin / filteredData.length : 0;
+
+    return [
+      {
+        title: "Average Volume",
+        value: `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(avgVolume)}`,
+      },
+      {
+        title: "Average Price",
+        value: `$${avgPrice.toFixed(2)}`,
+      },
+      {
+        title: "Average Profit Margin",
+        value: `${(avgProfitMargin * 100).toFixed(2)}%`,
+      },
+    ];
+  }, [filteredData]);
   return (
-<Stack align="center" justify="xl" p="xl">
-  {/* Performance Cards */}
-  <Group justify="space-between" grow style={{ width: '100%' }}>
-    {stockMetrics.map((metric) => (
-      <PerformanceCard
-        key={metric.title}
-        title={metric.title}
-        value={metric.value}
-      />
-    ))}
-  </Group>
+    <Stack align="center" justify="xl" p="xl">
+      {/* Performance Cards */}
+      <Group justify="space-between" grow style={{ width: '100%' }}>
 
-  {/* Stock Filter */}
-  <Card style={{ width: '100%' }} p="xl">
-    <StockFilter
-      data={stockData}
-      values={filters}
-      onChange={setFilters}
-    />
-  </Card>
+        {stockMetrics.map((metric) => (
 
-  {/* Data Table with Loading and Button */}
-  <Card style={{ width: '100%' }} p="xl">
-    <LoadingOverlay visible={loading} />
-    <DataTable
-      data={filteredData}
-      rowsPerPage={10}
-      selectedRows={selectedTickers}
-      onSelectionChange={(selected) => setSelectedTickers(selected)}
-    />
+          <PerformanceCard
+            key={metric.title}
+            title={metric.title}
+            value={metric.value}
+          />
+        ))}
+      </Group>
 
-    {selectedTickers.length > 0 && (
-      <Button
-        component="a"
-        size="lg"
-        href="model-selection"
-        mt="md"
-        onClick={() => console.log('Selected rows:', selectedTickers)}
-      >
-        Create and optimize a portfolio with my {selectedTickers.length} selected stock(s)
-      </Button>
-    )}
-  </Card>
-</Stack>
+      {/* Stock Filter */}
+      <Card style={{ width: '100%' }} p="xl">
+        <StockFilter
+          data={stockData}
+          values={filters}
+          onChange={setFilters}
+        />
+      </Card>
+
+      {/* Data Table with Loading and Button */}
+      <Card style={{ width: '100%' }} p="xl">
+        <LoadingOverlay visible={loading} />
+        <DataTable
+          data={mappedData}
+          rowsPerPage={10}
+          selectedRows={selectedTickers}
+          onSelectionChange={(selected) => setSelectedTickers(selected)}
+        />
+
+        {selectedTickers.length > 0 && (
+          <Button
+            component="a"
+            size="lg"
+            href="model-selection"
+            mt="md"
+            onClick={() => console.log('Selected rows:', selectedTickers)}
+          >
+            Optimize portfolio with {selectedTickers.length} selected stock(s)
+          </Button>
+        )}
+      </Card>
+      {/* <ScrollArea h={300} offsetScrollbars mt="md">
+
+        <Code block>{JSON.stringify(filteredData, null, 2)}</Code>
+
+      </ScrollArea> */}
+
+    </Stack>
   );
 }
