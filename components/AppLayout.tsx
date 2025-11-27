@@ -13,20 +13,18 @@ import {
   useMantineColorScheme,
   Box,
   Stack,
-  Flex
+  Flex,
+  useComputedColorScheme
 } from '@mantine/core';
 
 import {
   IconHomeFilled,
   IconChartDots2,
   IconTable,
-  IconFolderPlus,
   IconSun,
   IconMoon,
-  IconCurrencyDollar,
-  IconCoinBitcoin,
   IconRainbow,
-  IconHexagon3d, //IconDeviceAnalytics also cool design
+  IconHexagon3d,
   IconUserHexagon,
   IconSettings,
   IconBell
@@ -34,12 +32,14 @@ import {
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import cx from 'clsx';
+import classes from './Demo.module.css';
+
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-// Define links with potential nested children
 const links = [
   { label: 'Home', href: '/', icon: <IconHomeFilled size={16} /> },
   { label: 'Portfolio', href: '/portfolio', icon: <IconChartDots2 size={16} /> },
@@ -53,11 +53,21 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   useEffect(() => setMounted(true), []);
 
+  const { setColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
+
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
+  // const { colorScheme, setColorScheme } = useMantineColorScheme();
 
-  // Recursive function to render NavLinks including nested children
+  // Close sidebar by default on home page
+  useEffect(() => {
+    if (pathname === "/") {
+      if (desktopOpened) toggleDesktop();
+      if (mobileOpened) toggleMobile();
+    }
+  }, [pathname]);
+
   const renderNavLink = (link: any) => {
     if (link.children) {
       return (
@@ -91,16 +101,13 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <AppShell
-      // padding="lg"
       header={{ height: 60 }}
       navbar={{
         width: 175,
         breakpoint: 'sm',
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
       }}
-
     >
-      {/* Header */}
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           <Flex align="center" gap="md">
@@ -118,26 +125,20 @@ export function AppLayout({ children }: AppLayoutProps) {
           </Flex>
 
           <Group>
-            <IconBell>
-
-            </IconBell>
-
-            {mounted && (
-              <ActionIcon
-                onClick={() => setColorScheme(colorScheme === 'light' ? 'dark' : 'light')}
-                variant="default"
-                aria-label="Toggle color scheme"
-              >
-                {colorScheme === 'light' ? <IconSun stroke={1.5} /> : <IconMoon stroke={1.5} />}
-              </ActionIcon>
-            )}
-
-
+            <IconBell />
+    <ActionIcon
+      onClick={() => setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light')}
+      variant="default"
+      size="xl"
+      aria-label="Toggle color scheme"
+    >
+  <IconSun className={cx(classes.icon, classes.light)} stroke={1.5} />
+      <IconMoon className={cx(classes.icon, classes.dark)} stroke={1.5} />
+    </ActionIcon>
           </Group>
         </Group>
       </AppShell.Header>
 
-      {/* Navbar */}
       <AppShell.Navbar>
         <AppShell.Section grow my="md" component={ScrollArea} px="md">
           {links.map((link) => renderNavLink(link))}
@@ -145,7 +146,6 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         <AppShell.Section my="md" px="md">
           <Stack gap={8}>
-
             <NavLink
               label="Settings"
               leftSection={<IconSettings size={18} />}
@@ -166,15 +166,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                 borderRadius: theme.radius.md,
               })}
             />
-
-
           </Stack>
         </AppShell.Section>
-
-
       </AppShell.Navbar>
 
-      {/* Main content */}
       <AppShell.Main>
         <Box>{children}</Box>
       </AppShell.Main>

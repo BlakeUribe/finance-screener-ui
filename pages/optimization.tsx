@@ -1,19 +1,14 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import {
   Text,
-  Code,
-  ScrollArea,
   Title,
   Container,
   Group,
   Card,
   Stack,
-  Button,
   LoadingOverlay,
 } from '@mantine/core';
-
-import { IconDownload, IconCurrencyDollar, IconTimeline, IconChartArcs } from '@tabler/icons-react';
-
+import { IconCurrencyDollar, IconTimeline, IconChartArcs } from '@tabler/icons-react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -24,71 +19,53 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ReferenceLine
+  ReferenceLine,
+  Legend
 } from 'recharts';
 
 import { theme, defaultShade } from '@/theme';
 import { DataTable } from '@/components/DataTable';
 import { PerformanceCard } from '@/components/PerformanceCard';
 import { ExportButton } from '@/components/ExportButton';
+import { RiskReturnChart } from '@/components/charts/RiskReturnChart';
+import { PerformanceChart } from '@/components/charts/PerformanceChart';
 
-// const brand = theme.colors.brand[defaultShade!];
-
-interface PortfolioPoint {
-  portfolio_std: number;
-  portfolio_ret: number;
-}
-
-interface OptimizationData {
-  result: {
-    model: string;
-    portfolio: {
-      weights: Record<string, number>;
-      expected_return: number;
-      portfolio_std: number;
-      sharpe_ratio: number;
-    };
-  };
-  distinct_portfolios: PortfolioPoint[];   // filtered, well-separated portfolios
-  frontier_portfolios: PortfolioPoint[];   // Pareto-efficient frontier
-  debug: {
-    received_start: string;
-    received_end: string;
-  };
-}
+// --- MAIN COMPONENT ---
 
 export default function OptimizationPage() {
-  const [data, setData] = useState<OptimizationData | null>(null);
+  // 2. OPTIMIZATION: Lazy Initial State
+  // Instead of useEffect to load localStorage (which causes a double render), 
+  // we read it once during initialization.
+  const [data, setData] = useState<any | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('optimizationResult');
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error('Error parsing optimizationResult:', error);
+      return null;
+    }
+  });
+
   const [backtestResult, setBacktestResult] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const scaledBacktest = backtestResult.map((item) => ({
-    ...item,
-    Portfolio_Returns: item.Portfolio_Returns * 100,
-  }));
+  // 3. OPTIMIZATION: useMemo for data transformation
+  // This prevents re-mapping the array on every render
+  const scaledBacktest = useMemo(() => {
+    if (!backtestResult || backtestResult.length === 0) return [];
+    return backtestResult.map((item) => ({
+      ...item,
+      Portfolio_Returns: item.Portfolio_Returns * 100,
+    }));
+  }, [backtestResult]);
 
-  const successColor = theme.colors?.success?.[defaultShade] || 'green';
-  const dangerColor = theme.colors?.danger?.[defaultShade] || 'red';
-
-  // Load optimization data from localStorage
+  // Fetch backtest logic
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('optimizationResult');
-      if (stored) setData(JSON.parse(stored));
-    } catch (error) {
-      console.error('Error parsing optimizationResult:', error);
-    }
-  }, []);
+    if (!data) return;
 
-  // Fetch backtest once data is loaded
-  useEffect(() => {
-    if (!data) return; // wait until data is loaded
-
-    const backtestPayload = {
-      weights: data?.result?.portfolio?.weights,
-      received_start: data?.debug?.received_start,
-      received_end: data?.debug?.received_end,
-    };
+    // Avoid fetching if we already have results (unless you want to force refresh)
+    if (backtestResult.length > 0) return;
 
     const fetchBacktestData = async () => {
       setLoading(true);
@@ -98,52 +75,48 @@ export default function OptimizationPage() {
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(backtestPayload),
+            body: JSON.stringify({
+              weights: data?.result?.portfolio?.weights,
+              received_start: data?.debug?.received_start,
+              received_end: data?.debug?.received_end,
+            }),
           }
         );
 
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
         const json = await res.json();
+
+        // Batch updates if possible, but here we just set one state
         setBacktestResult(json.cumulative_returns ?? []);
       } catch (err) {
         console.error('Error fetching backtest:', err);
-        setBacktestResult([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchBacktestData();
-  }, [data]); // ✅ only run when data is ready
+  }, [data]);
 
-  // Prepare data for display
-  const holdingsData =
+  // 4. OPTIMIZATION: useMemo for derived UI data
+  const holdingsData = useMemo(() =>
     data?.result?.portfolio?.weights
       ? Object.entries(data.result.portfolio.weights).map(([ticker, weight]) => ({
         ticker,
         weight,
       }))
-      : [];
+      : [],
+    [data]);
 
-  const metrics =
+  const metrics = useMemo(() =>
     data?.result?.portfolio
       ? [
         { label: 'Expected Return', value: data.result.portfolio.expected_return, icon: <IconCurrencyDollar /> },
         { label: 'Portfolio Volatility', value: data.result.portfolio.portfolio_std, icon: <IconTimeline /> },
         { label: 'Sharpe Ratio', value: data.result.portfolio.sharpe_ratio, icon: <IconChartArcs /> },
       ]
-      : [];
-  const positiveArea = scaledBacktest.map(d => ({
-    ...d,
-    value: d.Portfolio_Returns > 0 ? d.Portfolio_Returns : 0, // exclude 0
-  }));
-
-  const negativeArea = scaledBacktest.map(d => ({
-    ...d,
-    value: d.Portfolio_Returns < 0 ? d.Portfolio_Returns : null, // exclude 0
-  }));
-
+      : [],
+    [data]);
 
   return (
     <Container size="lg" my="md">
@@ -162,8 +135,6 @@ export default function OptimizationPage() {
             key={metric.label}
             title={metric.label}
             value={metric.value}
-            // isUp={metric.isUp}
-            // change={metric.change}
             lastUpdated={"Just now"}
             icon={metric.icon}
             iconColor={null}
@@ -173,89 +144,41 @@ export default function OptimizationPage() {
 
       <Stack>
         <Card>
-          <Text fw={500} mb="sm">
-            Historical Performance
-          </Text>
-          <Text fw={300} mb="sm">
-            Portfolio vs Benchmark (Indexed to 100)
-          </Text>
+          <Text fw={500} mb="sm">Historical Performance</Text>
+          <Text fw={300} mb="sm">Portfolio vs Benchmark (Indexed to 100)</Text>
 
-          {/* ✅ Loading overlay wrapping the chart */}
           <LoadingOverlay visible={loading} />
-          {!loading && (
 
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={scaledBacktest}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="Date"
-                  tickFormatter={(dateStr) => {
-                    const date = new Date(dateStr);
-                    return `${date.toLocaleString("default", { month: "short" })}/${date.getFullYear()}`;
-                  }}
-                  tick={{ fontSize: 12 }}
-                  allowDuplicatedCategory={false}
-                  interval="preserveStartEnd"
-                />
-                <YAxis unit="%" />
-                <Tooltip formatter={(value: number) => `${value.toFixed(2)}%`} />
-
-                <Area type="monotone" dataKey="value" data={positiveArea} stroke={successColor} fill={successColor} dot={false} />
-                <Area type="monotone" dataKey="value" data={negativeArea} stroke={dangerColor} fill={dangerColor} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-
+          {/* Render chart only if we have data, otherwise show placeholder or empty */}
+          {scaledBacktest.length > 0 ? (
+            <PerformanceChart
+              data={scaledBacktest}
+              dataKey="Portfolio_Returns"
+              unit="%"
+            />
+          ) : (
+            !loading && <Text c="dimmed">No backtest data available.</Text>
           )}
-
         </Card>
 
         <Card mb="md" padding="md" withBorder>
-          <Text fw={500} mb="sm">
-            Portfolio Holdings
-          </Text>
+          <Text fw={500} mb="sm">Portfolio Holdings</Text>
           <DataTable data={holdingsData} rowsPerPage={10} selectable={false} />
-
         </Card>
 
         <Card>
+          {/* Optimization: If the datasets are empty, don't even try to render the heavy scatter chart */}
+          {data?.distinct_portfolios && (
 
-          <ScatterChart
-            style={{ width: '100%', height: 500 }}
-            margin={{ top: 20, right: 20, bottom: 10, left: 10 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-
-            <XAxis type="number" dataKey="portfolio_std" name="Risk (Std Dev)" unit="" />
-            <YAxis type="number" dataKey="portfolio_ret" name="Return" unit="" />
-
-            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-
-            <Scatter
-              name="Distinct Portfolios"
-              data={data?.distinct_portfolios.slice(0, 5)} // only first 5 points
-              fill="#8884d8"
+            <RiskReturnChart
+              distinct={data.distinct_portfolios}
+              frontier={data.frontier_portfolios}
             />
-
-            <Scatter
-              name="Frontier Portfolios"
-              data={data?.frontier_portfolios.slice(0, 5)}
-              fill="#82ca9d"
-            />
-            <ReferenceLine y={0.2} stroke="blue" />
-          </ScatterChart>
-
+          )}
         </Card>
 
-
         <ExportButton data={holdingsData} />
-
       </Stack>
-
-      {/* <ScrollArea h={300} offsetScrollbars mt="md">
-        <Code block>{JSON.stringify(data, null, 2)}</Code>
-        <Code block>{JSON.stringify(backtestResult.slice(0, 5), null, 2)}</Code>
-      </ScrollArea> */}
-
     </Container>
   );
 }

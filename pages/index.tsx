@@ -2,25 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { Title, Text, Stack, Grid, Card, Group, Box, Button, ThemeIcon, Container } from "@mantine/core";
-import { AreaChart } from "@mantine/charts";
 import { theme, defaultShade } from "@/theme";
 import { IconArrowRight, IconTrendingUp, IconShieldCheck, IconBolt } from '@tabler/icons-react';
-
 import { PerformanceCard } from "@/components/PerformanceCard";
+// import { PerformanceChart } from "@/components/PerformanceChart"; // import your custom chart
+import { PerformanceChart } from "@/components/charts/PerformanceChart";
 
 const successColor = theme.colors?.success?.[2] || "green";
 const failureColor = theme.colors?.danger?.[2] || "red";
-const brand = theme.colors?.brand || "blue"
+const brand = theme.colors?.brand || "blue";
 
-// Chart generator
-const createChart = (data: any[], seriesName: string, color: string) => (
-  <AreaChart
-    h={300}
-    data={data}
-    dataKey="Date"
-    series={[{ name: seriesName, color }]}
-  />
-);
+// Custom chart generator using PerformanceChart
+const createChart = (data: any[], seriesName: string, color?: string) => {
+  const chartData = data.map(d => ({
+    Date: d.Date,
+    Value: d[seriesName] ?? null,
+  }));
+
+  return <PerformanceChart data={chartData} dataKey="Value" positiveColor={successColor} negativeColor={failureColor} />;
+};
 
 export default function HomePage() {
   const [econData, setEconData] = useState<any[]>([]);
@@ -34,13 +34,11 @@ export default function HomePage() {
       try {
         const res = await fetch("https://2de1nbshda.execute-api.us-west-2.amazonaws.com/prod/");
         const json = await res.json();
-        const sortedData = json.data.sort(
-          (a: any, b: any) => new Date(a.Date).getTime() - new Date(b.Date).getTime()
-        );
+        const sortedData = json.data.sort((a: any, b: any) => new Date(a.Date).getTime() - new Date(b.Date).getTime());
         setEconData(sortedData);
-        setLoadingEcon(false);
       } catch (err) {
         console.error(err);
+      } finally {
         setLoadingEcon(false);
       }
     };
@@ -53,20 +51,18 @@ export default function HomePage() {
       try {
         const res = await fetch("https://40ebmzbm1a.execute-api.us-west-2.amazonaws.com/prod/");
         const json = await res.json();
-        const sortedData = json.data.sort(
-          (a: any, b: any) => new Date(a.Date).getTime() - new Date(b.Date).getTime()
-        );
+        const sortedData = json.data.sort((a: any, b: any) => new Date(a.Date).getTime() - new Date(b.Date).getTime());
         setIndexData(sortedData);
-        setLoadingIndex(false);
       } catch (err) {
         console.error(err);
+      } finally {
         setLoadingIndex(false);
       }
     };
     fetchIndexData();
   }, []);
 
-  // --- Sections ---
+  // Sections
   const indexSections = [
     { title: "Major Indexes Performance", valueTitle: "S&P500" },
     { title: "Major Indexes Performance", valueTitle: "Nasdaq" },
@@ -80,20 +76,10 @@ export default function HomePage() {
     { title: "Economic Indicators", valueTitle: "Real_GDP" },
   ];
 
-  // Map sections to charts
   const mapSections = (sections: typeof indexSections | typeof econSections, data: any[], loading: boolean) =>
     sections.map((section, idx) => ({
       ...section,
-      chart: loading
-        ? <Text>Loading...</Text>
-        : createChart(
-          data.map((d) => ({
-            Date: d.Date,
-            [section.valueTitle]: d[section.valueTitle] ?? null
-          })),
-          section.valueTitle,
-          idx % 2 === 0 ? successColor : failureColor
-        ),
+      chart: loading ? <Text>Loading...</Text> : createChart(data, section.valueTitle),
     }));
 
   const dashboardSections = [
@@ -101,21 +87,15 @@ export default function HomePage() {
     ...mapSections(econSections, econData, loadingEcon),
   ];
 
-  const groupedSections = dashboardSections.reduce<Record<string, typeof dashboardSections>>(
-    (acc, section) => {
-      if (!acc[section.title]) acc[section.title] = [];
-      acc[section.title].push(section);
-      return acc;
-    },
-    {}
-  );
-  type IndexKey = "S&P500" | "Nasdaq" | "Dow_Jones";
-  type EconKey = "Fed_Funds" | "CPI" | "Unemployment_Rate" | "Real_GDP";
+  const groupedSections = dashboardSections.reduce<Record<string, typeof dashboardSections>>((acc, section) => {
+    if (!acc[section.title]) acc[section.title] = [];
+    acc[section.title].push(section);
+    return acc;
+  }, {});
 
-  // Unified key type
-  type DashboardKey = IndexKey | EconKey;
+  // Latest values
+  type DashboardKey = "S&P500" | "Nasdaq" | "Dow_Jones" | "Fed_Funds" | "CPI" | "Unemployment_Rate" | "Real_GDP";
 
-  // Unified latest values object
   const latestValues: Record<DashboardKey, number | null> = {
     "S&P500": indexData.length ? indexData[indexData.length - 1]["S&P500"] : null,
     Nasdaq: indexData.length ? indexData[indexData.length - 1]["Nasdaq"] : null,
@@ -131,27 +111,17 @@ export default function HomePage() {
     { title: "Nasdaq", key: "Nasdaq" },
     { title: "Dow Jones", key: "Dow_Jones" },
     { title: "Fed Funds Rate", key: "Fed_Funds" },
-    // Add/remove any other indicators dynamically
   ];
 
   return (
     <div>
-      {/* Top section with a different color */}
-      <Box w="100%" bg={brand[defaultShade]} py="xl" >
-        {/* <Box w="100%"  py="xl" > */}
-
-        <Container c="white" p="lg">
-          {/* Titles and Intro */}
+      <Box w="100%" bg={brand[defaultShade]} py="xl">
+        <Container  c="white" p="lg">
           <Title order={1}>Smart Portfolio Optimization</Title>
           <Title order={1}>Made Simple</Title>
-          <Text>
-            Screen many portfolios and optimize your investments with real-time economic data.
-          </Text>
-          <Text>
-            Make informed decisions backed by comprehensive market analysis and cutting-edge algorithms.
-          </Text>
+          <Text>Screen many portfolios and optimize your investments with real-time economic data.</Text>
+          <Text>Make informed decisions backed by comprehensive market analysis and cutting-edge algorithms.</Text>
 
-          {/* Buttons */}
           <Group gap="md" mt="md">
             <Button variant="filledAlt" component="a" href="/stock-screener" rightSection={<IconArrowRight size={24} />} size="lg">
               Get Started
@@ -161,7 +131,6 @@ export default function HomePage() {
             </Button>
           </Group>
 
-          {/* Features */}
           <Group gap="2xl" justify="center" mt="xl" grow>
             {[
               { icon: IconTrendingUp, title: "Real-time Analysis", subtitle: "Live Market Data" },
@@ -183,39 +152,34 @@ export default function HomePage() {
       </Box>
 
       <Stack gap="xl" p="xl">
-        <Stack gap="xl" justify="center">
-          {/* Most Recent Index Values */}
-          <Group grow>
-            {dashboardCards.map((card) => (
-              <PerformanceCard
-                title={card.title}
-                value={
-                  latestValues[card.key] ?? null}
-                isUp={true}
-              />
-            ))}
-
-          </Group>
-
-          {/* Dashboard Grid */}
-          {Object.entries(groupedSections).map(([sectionTitle, cards]) => (
-            <Stack key={sectionTitle} gap="md">
-              <Title order={3}>{sectionTitle}</Title>
-              <Grid grow>
-                {cards.map((card) => (
-                  <Grid.Col key={card.valueTitle} span={6}>
-                    <Card shadow="sm" p="md" radius="md">
-                      <Group justify="space-between" mb="sm">
-                        <Title order={4}>{card.valueTitle}</Title>
-                      </Group>
-                      {card.chart}
-                    </Card>
-                  </Grid.Col>
-                ))}
-              </Grid>
-            </Stack>
+        <Group justify="space-between" gap="lg" grow>
+          {dashboardCards.map((card) => (
+            <PerformanceCard
+              key={card.key}
+              title={card.title}
+              value={latestValues[card.key] ?? null}
+              isUp={true}
+            />
           ))}
-        </Stack>
+        </Group>      
+
+        {Object.entries(groupedSections).map(([sectionTitle, cards]) => (
+          <Stack key={sectionTitle} gap="md">
+            <Title order={3}>{sectionTitle}</Title>
+            <Grid grow>
+              {cards.map((card) => (
+                <Grid.Col key={card.valueTitle} span={3}>
+                  <Card >
+                    <Group justify="space-between" mb="sm">
+                      <Title order={4}>{card.valueTitle}</Title>
+                    </Group>
+                    {card.chart}
+                  </Card>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Stack>
+        ))}
       </Stack>
     </div>
   );

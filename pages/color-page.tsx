@@ -1,4 +1,3 @@
-// pages/color-page.tsx
 import {
   Stack,
   Title,
@@ -11,9 +10,12 @@ import {
   useMantineTheme,
   Card,
   Table,
-  TableData
+  TableData,
+  useMantineColorScheme
 } from "@mantine/core";
+
 import { IconAlertCircle, IconCheck } from "@tabler/icons-react";
+import { defaultShade } from "@/theme";
 
 const tableData: TableData = {
   caption: 'Some elements from periodic table',
@@ -29,13 +31,17 @@ const tableData: TableData = {
 
 
 export default function ColorPage() {
+
   const theme = useMantineTheme();
   const palettes = ["brand", "secondary", "danger", "warning", "success", "dark", "light"] as const;
+    const { colorScheme } = useMantineColorScheme(); // <-- get current theme
 
   return (
     <Stack gap="xl" p="xl">
       <Title order={1}>Color Page Preview</Title>
       <Text>Check that all Buttons, Badges, Alerts, Card, and Table follow your global theme styles.</Text>
+      <Text>Current theme: <b>{colorScheme}</b></Text> {/* <-- show theme */}
+      <Text> Default Shade: <b>{defaultShade}</b></Text> {/* <-- show theme */}
 
       {palettes.map((name) => (
         <Stack key={name} gap="sm">
@@ -56,7 +62,7 @@ export default function ColorPage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <Text>{i}</Text>
+                <Text>{i+1}</Text>
               </Box>
             ))}
           </Group>
@@ -84,8 +90,10 @@ export default function ColorPage() {
       {/* Card Preview */}
       <Stack gap="sm" mt="xl">
         <Text fw={700}>Card Preview</Text>
-        <Card shadow="sm" p="lg" radius="md" withBorder>
-          <Text>This is a sample Card. It uses the global theme's border and shadow.</Text>
+
+        <Card withBorder>
+
+          <Text>This is a sample Card. It uses the our theme's border and shadow.</Text>
           <Button mt="sm" color="brand">Card Button</Button>
         </Card>
       </Stack>
@@ -99,7 +107,7 @@ export default function ColorPage() {
 
       <Stack gap="sm" mt="xl">
         <Text fw={700}>Table in Card Preview</Text>
-        <Card shadow="sm" p="lg" radius="md" withBorder>
+        <Card withBorder>
           <Table withTableBorder highlightOnHover data={tableData}>
           </Table>
         </Card>
@@ -110,10 +118,13 @@ export default function ColorPage() {
           Defualt
         </Button>
         <Button variant="outline">
-          Outline
+          Outline "outline"
         </Button>
         <Button variant="filledAlt">
-          White Background w Brand colors
+          White Background w Brand colors "filledAlt"
+        </Button>
+        <Button variant="alt">
+          Transpart Background w white text "alt"
         </Button>
 
       </Stack>

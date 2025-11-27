@@ -1,19 +1,17 @@
-import { MantineThemeOverride } from '@mantine/core';
+import { MantineThemeOverride, useComputedColorScheme } from '@mantine/core';
 
-export const defaultShade = 5; // use index 5 for backgrounds and borders
+export const defaultShade = 5; // index for backgrounds and borders
 const borderThickness = '2px';
 const shadowColorLight = 'rgba(0, 0, 0, 0.15)';
 const shadowColorDark = 'rgba(0, 0, 0, 0.6)';
 const shadowOffset = '0 2px 6px';
 const buttonHoverShade = 9;
 
-export const buttonBackgroundColor = 4
-
+export const buttonBackgroundColor = 4;
 
 export const theme: MantineThemeOverride = {
-  fontFamily: "Inter, sans-serif",
-  primaryColor: "brand",
-
+  fontFamily: 'Inter, sans-serif',
+  primaryColor: 'brand',
   colors: {
     brand: [
       "hsl(230 80% 73%)",
@@ -44,8 +42,16 @@ export const theme: MantineThemeOverride = {
       "hsl(140 50% 30%)", "hsl(140 50% 25%)", "hsl(140 50% 20%)", "hsl(140 50% 15%)", "hsl(140 50% 10%)"
     ],
     light: [
-      "hsl(213 22% 90%)", "hsl(213 22% 90%)", "hsl(213 22% 90%)", "hsl(213 22% 90%)", "hsl(213 22% 90%)",
-      "hsl(213 22% 90%)", "hsl(213 22% 90%)", "hsl(213 22% 90%)", "hsl(213 22% 90%)", "hsl(213 22% 90%)"
+      "hsl(213 15% 98%)", // 1
+      "hsl(213 15% 98%)",
+      "hsl(213 15% 97%)",
+      "hsl(213 15% 97%)",
+      "hsl(213 15% 96%)", // 5
+      "hsl(213 15% 92%)",
+      "hsl(213 15% 91%)",
+      "hsl(213 15% 90%)",
+      "hsl(213 15% 89%)",
+      "hsl(213 15% 88%)"
     ],
     dark: [
       "hsl(213 22% 90%)", // Text for dark screen
@@ -66,158 +72,153 @@ export const theme: MantineThemeOverride = {
   components: {
 
     Button: {
-      styles: (
-        theme: { colors: { [x: string]: any[] }; colorScheme: string },
-        params: { color: any; variant?: string }
-      ) => {
-        const bgColor = theme.colors[params.color || "brand"][defaultShade];
-        const hoverColor = theme.colors[params.color || "brand"][buttonHoverShade];
-        const shadow = theme.colorScheme === "dark" ? shadowColorDark : shadowColorLight;
+      styles: (theme: any, params: any) => {
+        const bgColor = theme.colors[params.color || 'brand']?.[defaultShade] ?? '#000';
+        const hoverColor = theme.colors[params.color || 'brand']?.[buttonHoverShade] ?? '#000';
+        const shadow = shadowColorLight;
 
-        // Alt variant: brand background, white text + border
-        if (params.variant === "alt") {
+        // Base styles
+        const base = {
+          borderRadius: '0.5rem',
+          boxShadow: `${shadowOffset} ${shadow}`,
+          transition: 'all 0.2s ease',
+        };
+
+        // Variants
+        if (params.variant === 'filledAlt') {
           return {
             root: {
-              backgroundColor: bgColor,
-              border: `${borderThickness} solid ${theme.colors.white[0]}`,
-              boxShadow: `${shadowOffset} ${shadow}`,
-              color: theme.colors.white[0],
-              transition: "all 0.2s ease",
-              "&:hover": {
-                backgroundColor: hoverColor,
-                boxShadow: `0 4px 10px ${shadow}`,
-                color: theme.colors.white[0],
-              },
-            },
-          };
-        }
-
-        // DefaultAlt variant: same as alt (kept for backward compatibility)
-        if (params.variant === "defaultAlt") {
-          return {
-            root: {
-              backgroundColor: bgColor,
-              border: `${borderThickness} solid ${theme.colors.white[0]}`,
-              boxShadow: `${shadowOffset} ${shadow}`,
-              color: theme.colors.white[0],
-              transition: "all 0.2s ease",
-              "&:hover": {
-                backgroundColor: hoverColor,
-                boxShadow: `0 4px 10px ${shadow}`,
-                color: theme.colors.white[0],
-              },
-            },
-          };
-        }
-
-        // FilledAlt variant: white background, brand text
-        if (params.variant === "filledAlt") {
-          return {
-            root: {
+              ...base,
               backgroundColor: theme.colors.white[0],
-              border: `${borderThickness} solid ${theme.colors.white[0]}`,
-              boxShadow: `${shadowOffset} ${shadow}`,
               color: bgColor,
-              transition: "all 0.2s ease",
-              "&:hover": {
-                backgroundColor: "#f7f7f7", // slightly off-white for hover
-                boxShadow: `0 4px 10px ${shadow}`,
+              border: `${borderThickness} solid ${theme.colors.white[0]}`,
+              '&:hover': {
+                backgroundColor: '#f7f7f7',
                 color: hoverColor,
+                boxShadow: `0 4px 10px ${shadow}`,
               },
             },
           };
         }
 
-        // Existing default/outline logic
+        if (params.variant === 'alt') {
+          return {
+            root: {
+              ...base,
+              backgroundColor: 'transparent',
+              color: theme.colors.white[0],
+              border: `${borderThickness} solid ${theme.colors.white[0]}`,
+              '&:hover': {
+                backgroundColor: hoverColor,
+                color: theme.colors.white[0],
+                boxShadow: `0 4px 10px ${shadow}`,
+              },
+            },
+          };
+        }
+
+        if (params.variant === 'outline') {
+          return {
+            root: {
+              ...base,
+              backgroundColor: 'transparent',
+              color: bgColor,
+              border: `${borderThickness} solid ${bgColor}`,
+              '&:hover': {
+                backgroundColor: hoverColor,
+                color: theme.colors.white[0],
+                boxShadow: `0 4px 10px ${shadow}`,
+              },
+            },
+          };
+        }
+
+        // Default (filled)
         return {
           root: {
-            backgroundColor: params.variant === "outline" ? "transparent" : bgColor,
+            ...base,
+            backgroundColor: bgColor,
+            color: theme.colors.white[0],
             border: `${borderThickness} solid ${bgColor}`,
-            boxShadow: `${shadowOffset} ${shadow}`,
-            color: params.variant === "outline" ? bgColor : theme.colors.white[0],
-            transition: "all 0.2s ease",
-            "&:hover": {
+            '&:hover': {
               backgroundColor: hoverColor,
-              color: params.variant === "outline" ? theme.colors.white[0] : theme.colors.white[0],
               boxShadow: `0 4px 10px ${shadow}`,
             },
           },
         };
       },
     },
-    Badge: {
-      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }, params: { color: any }) => ({
-        root: {
-          borderTop: `${borderThickness} solid ${theme.colors[params.color || "brand"][defaultShade]}`,
-          borderRight: `${borderThickness} solid ${theme.colors[params.color || "brand"][defaultShade]}`,
-          borderBottom: `${borderThickness} solid ${theme.colors[params.color || "brand"][defaultShade]}`,
-          borderLeft: `${borderThickness} solid ${theme.colors[params.color || "brand"][defaultShade]}`,
-          boxShadow: `${shadowOffset} ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
-          transition: "all 0.2s ease"
-        }
-      })
-    },
-    Alert: {
-      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }, params: { color: any }) => {
-        const colorPalette = theme.colors[params.color || "brand"];
-        return {
-          root: {
-            backgroundColor: colorPalette[defaultShade],
-            color: theme.colorScheme === 'dark' ? colorPalette[defaultShade - 4] : colorPalette[defaultShade + 4], // <-- text color
-            borderTop: `${borderThickness} solid ${colorPalette[defaultShade]}`,
-            borderRight: `${borderThickness} solid ${colorPalette[defaultShade]}`,
-            borderBottom: `${borderThickness} solid ${colorPalette[defaultShade]}`,
-            borderLeft: `${borderThickness} solid ${colorPalette[defaultShade]}`,
-            borderRadius: "0.5rem",
-            boxShadow: `${shadowOffset} ${theme.colorScheme === 'dark' ? shadowColorDark : shadowColorLight}`,
-            transition: "all 0.2s ease",
-
-
-          }
-
-        }
-      }
-    },
     Card: {
-      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }) => ({
-        root: {
-          borderRadius: '0.5rem',
-          // border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[defaultShade] : theme.colors.light[defaultShade]}`,
+      styles: (theme: any, params: any) => {
+        const colorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
 
-          // backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[defaultShade] : theme.colors.success[defaultShade],
+        const bgColor =
+          colorScheme === 'dark'
+            ? theme.colors?.dark?.[defaultShade + 3] ?? '#1a1b1e'
+            : theme.colors?.light?.[defaultShade - 3] ?? '#f8f9fa';
 
-          boxShadow: theme.colorScheme === 'dark' ? '0 4px 12px rgba(0,0,0,0.6)' : '0 2px 6px rgba(0,0,0,0.15)',
-          transition: 'all 0.2s ease'
+
+        const borderColor =
+          colorScheme === 'dark'
+            ? theme.colors?.dark?.[defaultShade - 3] ?? '#333'
+            : theme.colors?.light?.[defaultShade + 4] ?? '#ddd'; // possibly make this less noticable
+
+        const shadow = colorScheme === 'dark' ? shadowColorDark : shadowColorLight;
+
+
+        return {
+
+          root: {
+            border: `2px solid ${borderColor}`, // <-- add this line
+            borderRadius: '0.5rem',
+            backgroundColor: bgColor,
+            boxShadow: `${shadowOffset} ${shadow}`,
+            transition: 'all 0.2s ease',
+          },
         }
-      })
+      },
     },
+
+
     Box: {
-      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }) => ({
+      styles: () => ({
         root: {
           borderRadius: '0.5rem',
-          border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[defaultShade] : theme.colors.white[defaultShade]}`,
-          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[defaultShade] : theme.colors.white[defaultShade],
-          boxShadow: theme.colorScheme === 'dark' ? '0 4px 12px rgba(0,0,0,0.6)' : '0 2px 6px rgba(0,0,0,0.15)',
-          transition: 'all 0.2s ease'
-        }
-      })
+          border: `${borderThickness} solid ${shadowColorLight}`,
+          boxShadow: `${shadowOffset} ${shadowColorLight}`,
+          transition: 'all 0.2s ease',
+        },
+      }),
     },
+
+    Badge: {
+      styles: () => ({
+        root: {
+          borderRadius: '0.5rem',
+          boxShadow: `${shadowOffset} ${shadowColorLight}`,
+          transition: 'all 0.2s ease',
+        },
+      }),
+    },
+
+    Alert: {
+      styles: () => ({
+        root: {
+          borderRadius: '0.5rem',
+          boxShadow: `${shadowOffset} ${shadowColorLight}`,
+          transition: 'all 0.2s ease',
+        },
+      }),
+    },
+
     LoadingOverlay: {
       defaultProps: {
         overlayBlur: 2,
         zIndex: 1000,
         loaderProps: { color: 'brand', type: 'bars' },
       },
-      styles: (theme: { colors: { [x: string]: any[] }; colorScheme: string }) => ({
-        root: {
-          // backgroundColor:
-          //   theme.colorScheme === 'dark'
-          //     ? theme.colors.dark?.[6] || '#1A1B1E'
-          //     : theme.colors.gray?.[0] || '#F8F9FA',
-          // borderRadius: '0.5rem',
-          // transition: 'all 0.2s ease-in-out',
-        },
-      }),
     },
-  }
+  },
 };
+
+
