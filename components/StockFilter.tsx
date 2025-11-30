@@ -1,5 +1,6 @@
-import { Container, Grid, Select, Tabs, Stack, RangeSlider, Text } from '@mantine/core';
+import { Container, Grid, Select, Tabs, RangeSlider, Text, Divider } from '@mantine/core';
 import { IconLetterCase, IconMathXDivideY2, IconSettings } from '@tabler/icons-react';
+import { theme, defaultShade } from '@/theme';
 
 type FilterValues = { [key: string]: string | number | [number, number] | undefined };
 
@@ -52,9 +53,12 @@ export function StockFilter({ data, values, onChange }: StockFilterProps) {
     quantitativeStats[key] = { min, max };
   });
 
+  const brandColor = theme.colors?.brand?.[defaultShade];
+
   return (
     <Container fluid h="100%" w="100%" p="md">
-      <Tabs defaultValue="Qualitative" variant="outline">
+      <Tabs defaultValue="Qualitative" variant="pills" color={brandColor}
+      >
         <Tabs.List>
           <Tabs.Tab value="Qualitative" leftSection={<IconLetterCase size={16} />}>
             Qualitative
@@ -67,6 +71,7 @@ export function StockFilter({ data, values, onChange }: StockFilterProps) {
           </Tabs.Tab>
         </Tabs.List>
 
+        <Divider />
         {/* Qualitative Filters */}
         <Tabs.Panel value="Qualitative" pt="md">
           <Grid grow gutter="lg">

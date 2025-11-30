@@ -1,55 +1,56 @@
-import { useState, useRef } from 'react';
-import { FloatingIndicator, Tabs } from '@mantine/core';
-import classes from '../components/Tabs.module.css';
-import { Card, Group, Text, Badge, Container, Stack } from '@mantine/core';
-export default function UserPage() {
-  const [value, setValue] = useState<string | null>('1');
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const controlsRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+import { useState } from 'react';
+import { Container, Card, Group, Text, Badge, Stack, Tabs, Divider } from '@mantine/core';
+import { IconPhoto, IconMessageCircle, IconSettings } from '@tabler/icons-react';
+import { theme, defaultShade } from '@/theme';
 
-  const setControlRef = (val: string) => (node: HTMLButtonElement | null) => {
-    controlsRefs.current[val] = node; // update mutable ref, no state change
-  };
+
+export default function UserPage() {
+  const [value, setValue] = useState<string | null>('gallery');
+
+  const brandColor = theme.colors?.brand?.[defaultShade];
+
+  const userTabs = [
+    { value: 'gallery', label: 'Gallery', icon: <IconPhoto size={12} />, content: 'Gallery tab content' },
+    { value: 'messages', label: 'Messages', icon: <IconMessageCircle size={12} />, content: 'Messages tab content' },
+    { value: 'settings', label: 'Settings', icon: <IconSettings size={12} />, content: 'Settings tab content' },
+  ];
 
   return (
-    <>
-<Container>
+    <Container p="xl">
       <Card mb="xl" p="lg">
         <Group mb="sm">
           <Text fw={600}>John Doe</Text>
           <Badge color="blue">Standard Member</Badge>
         </Group>
 
-        <Stack >
+        <Stack>
           <Text>Email: john.doe@example.com</Text>
           <Text>Location: Seattle, WA</Text>
           <Text>Join Date: Jan 1, 2023</Text>
         </Stack>
       </Card>
-    <Tabs variant="none" value={value} onChange={setValue}>
-      <Tabs.List ref={rootRef} className={classes.list}>
-        <Tabs.Tab value="1" ref={setControlRef('1')} className={classes.tab}>
-          First tab
-        </Tabs.Tab>
-        <Tabs.Tab value="2" ref={setControlRef('2')} className={classes.tab}>
-          Second tab
-        </Tabs.Tab>
-        <Tabs.Tab value="3" ref={setControlRef('3')} className={classes.tab}>
-          Settings tab
-        </Tabs.Tab>
 
-        <FloatingIndicator
-          target={value ? controlsRefs.current[value] : null}
-          parent={rootRef.current}
-          className={classes.indicator}
-        />
-      </Tabs.List>
-
-      <Tabs.Panel value="1">First tab content</Tabs.Panel>
-      <Tabs.Panel value="2">Second tab content</Tabs.Panel>
-      <Tabs.Panel value="3">Third tab content</Tabs.Panel>
-    </Tabs>
+      <Tabs
+        variant="pills"
+        color={brandColor}
+        autoContrast={true}
+        value={value}
+        onChange={setValue} radius="md"
+      >
+        <Tabs.List>
+          {userTabs.map((tab) => (
+            <Tabs.Tab key={tab.value} value={tab.value} leftSection={tab.icon}>
+              {tab.label}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+        <Divider />
+        {userTabs.map((tab) => (
+          <Tabs.Panel key={tab.value} value={tab.value}>
+            {tab.content}
+          </Tabs.Panel>
+        ))}
+      </Tabs>
     </Container>
-    </>
   );
 }

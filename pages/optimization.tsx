@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Text,
   Title,
@@ -9,21 +9,7 @@ import {
   LoadingOverlay,
 } from '@mantine/core';
 import { IconCurrencyDollar, IconTimeline, IconChartArcs } from '@tabler/icons-react';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  ScatterChart,
-  Scatter,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ReferenceLine,
-  Legend
-} from 'recharts';
 
-import { theme, defaultShade } from '@/theme';
 import { DataTable } from '@/components/DataTable';
 import { PerformanceCard } from '@/components/PerformanceCard';
 import { ExportButton } from '@/components/ExportButton';
@@ -155,6 +141,7 @@ export default function OptimizationPage() {
               data={scaledBacktest}
               dataKey="Portfolio_Returns"
               unit="%"
+              toolTipName="Portfolio Return"
             />
           ) : (
             !loading && <Text c="dimmed">No backtest data available.</Text>

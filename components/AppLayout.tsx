@@ -58,7 +58,6 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
-  // const { colorScheme, setColorScheme } = useMantineColorScheme();
 
   // Close sidebar by default on home page
   useEffect(() => {
@@ -91,10 +90,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         label={link.label}
         leftSection={link.icon}
         active={pathname === link.href}
-        variant={pathname === link.href ? "filled" : "subtle"}
-        style={(theme) => ({
-          borderRadius: theme.radius.md,
-        })}
+        variant={pathname === link.href ? 'filled' : 'subtle'}
+        style={(theme) => ({ borderRadius: theme.radius.md })}
       />
     );
   };
@@ -126,15 +123,15 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <Group>
             <IconBell />
-    <ActionIcon
-      onClick={() => setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light')}
-      variant="default"
-      size="xl"
-      aria-label="Toggle color scheme"
-    >
-  <IconSun className={cx(classes.icon, classes.light)} stroke={1.5} />
-      <IconMoon className={cx(classes.icon, classes.dark)} stroke={1.5} />
-    </ActionIcon>
+            <ActionIcon
+              onClick={() => setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light')}
+              variant="default"
+              size="xl"
+              aria-label="Toggle color scheme"
+            >
+              <IconSun className={cx(classes.icon, classes.light)} stroke={1.5} />
+              <IconMoon className={cx(classes.icon, classes.dark)} stroke={1.5} />
+            </ActionIcon>
           </Group>
         </Group>
       </AppShell.Header>
@@ -151,7 +148,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               leftSection={<IconSettings size={18} />}
               component={Link}
               href="/settings"
-              variant="subtle"
+              active={pathname === '/settings'}
+              variant={pathname === '/settings' ? 'filled' : 'subtle'}
               style={(theme) => ({
                 borderRadius: theme.radius.md,
               })}
@@ -161,7 +159,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               leftSection={<IconUserHexagon size={18} />}
               component={Link}
               href="/user"
-              variant="subtle"
+              active={pathname === '/user'}
+              variant={pathname === '/user' ? 'filled' : 'subtle'}
               style={(theme) => ({
                 borderRadius: theme.radius.md,
               })}

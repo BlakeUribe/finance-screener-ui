@@ -12,7 +12,7 @@ interface PerformanceCardProps {
   title: string;
   value: number | string | null | React.ReactNode;
   lastUpdated?: string | null; // optional, default null
-  isUp?: boolean;
+  isUp?: boolean | null;
   change?: number | null;
   icon?: React.ReactElement<{ color?: string }>;
   iconColor?: string | null;
