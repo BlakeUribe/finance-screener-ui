@@ -39,7 +39,7 @@ export default function StockScreener() {
   }, [setSelectedTickers]);
 
   // -------------------------------
-  // Filtered data for DataTable
+  // Filter Logic data for DataTable
   // -------------------------------
   const filteredData = useMemo(() => {
     return stockData.filter((item) => {
@@ -51,7 +51,7 @@ export default function StockScreener() {
           const [min, max] = value;
           return field >= min && field <= max;
         }
-        if (typeof value === 'number' && typeof field === 'number') return field === value;
+        if (typeof value === 'number' && typeof field === 'number') return field >= value; // ← changed
         return true;
       });
     });
@@ -108,7 +108,7 @@ export default function StockScreener() {
     ];
   }, [filteredData]);
   return (
-    <Stack align="center" justify="xl" p="xl">
+    <Stack align="center" justify="xl" p="xs">
       {/* Performance Cards */}
       <Group justify="space-between" grow style={{ width: '100%' }}>
 
@@ -131,23 +131,22 @@ export default function StockScreener() {
         />
       </Card>
 
-      {/* Data Table with Loading and Button */}
-      <Card style={{ width: '100%' }} p="xl">
-        <LoadingOverlay visible={loading} />
+      <Card style={{ width: "100%" }} >
         <DataTable
           data={mappedData}
           rowsPerPage={10}
           selectedRows={selectedTickers}
           onSelectionChange={(selected) => setSelectedTickers(selected)}
+          badgeColumns={["Sector", "Industry", "Index"]}
         />
 
         {selectedTickers.length > 0 && (
           <Button
             component="a"
-            size="lg"
+            // size="m"
             href="model-selection"
             mt="md"
-            onClick={() => console.log('Selected rows:', selectedTickers)}
+            onClick={() => console.log("Selected rows:", selectedTickers)}
           >
             Optimize portfolio with {selectedTickers.length} selected stock(s)
           </Button>

@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Grid, Card, Text, Button, Group, HoverCard, Loader, Pill, Collapse, Badge, Title, Stack, LoadingOverlay, Container, ActionIcon, Select } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 
-import { IconInfoCircleFilled, IconActivity, IconChevronDown, IconChevronUp, } from '@tabler/icons-react';
+import { IconCalendar, IconActivity, IconChevronDown, IconChevronUp, IconInfoCircle, } from '@tabler/icons-react';
 import { useSelectedStocks, } from '@/hooks/useSelectedStocks';
-import { theme, defaultShade } from '@/theme';
+// import { theme, defaultShade } from '@/theme';
 import { useDisclosure } from '@mantine/hooks';
+import { theme, defaultShade } from '@/theme';
 
-const brandColor = theme.colors?.brand
+const brandColor = theme.colors?.brand?.[defaultShade]
 
 const models = [
   {
@@ -58,6 +59,7 @@ export default function ModelSelectionPage() {
   const [loading, setLoading] = useState(false);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
   const [opened, { toggle }] = useDisclosure(false);
+
   const [valueStartDate, setValueStartDate] = useState<string | null>(null);
   const [valueEndDate, setValueEndDate] = useState<string | null>(null);
   const [period, setPeriod] = useState<string | null>(null);
@@ -70,6 +72,7 @@ export default function ModelSelectionPage() {
     console.log('Sending selected stocks:', tickers, 'with model:', modelId);
 
     const result = await sendSelectedStocks(tickers, modelId, valueStartDate, valueEndDate, period);
+    const brandColor = theme.colors?.brand?.[defaultShade] ?? '#007bff'; // fallback color
 
     setLoading(false);
 
@@ -122,148 +125,158 @@ export default function ModelSelectionPage() {
   }
 
   return (
-    <Container fluid>
-
+    // <Container fluid>
+    <>
       {/* Need to make this Full-screen overlay */}
       <LoadingOverlay
         visible={loading}
         overlayProps={{ radius: "sm", blur: 2 }}
         zIndex={1000}
       />
+      <Container fluid p="xs">
 
-      <Grid columns={24}>
-        {/* Left Column: Selected Stocks */}
-        <Grid.Col span={6}>
-          <Card padding="lg">
-            <Title order={2} mb="md">
-              Selected Stocks
-            </Title>
+        <Grid columns={24}>
+          {/* Left Column: Selected Stocks */}
+          <Grid.Col span={6}>
+            <Card padding="lg">
+              <Title order={2} mb="md">
+                Selected Stocks
+              </Title>
 
 
-            <Stack>
-              {selectedTickers.map((selectedStock, idx) => (
-                <Card key={idx} padding="sm">
-                  <Badge size="lg">
-                    {selectedStock.Tickers}
-                  </Badge>
-                  <Text mt="sm">{selectedStock.Company}</Text>
-                  <Text>
-                    {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(selectedStock.Close)}
-                  </Text>
+              <Stack>
+                {selectedTickers.map((selectedStock, idx) => (
+                  <Card key={idx} padding="sm">
+                    <Badge size="lg">
+                      {selectedStock.Tickers}
+                    </Badge>
+                    <Text mt="sm">{selectedStock.Company}</Text>
+                    <Text>
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(selectedStock.Close)}
+                    </Text>
+                  </Card>
+                ))}
+              </Stack>
+            </Card>
+          </Grid.Col>
+
+          {/* Right Column: Models */}
+          <Grid.Col span={18}>
+            <Card padding="lg">
+              <Title order={2} mb="md">
+                Optimization Models
+              </Title>
+
+              {models.map((model) => (
+                <Card
+                  key={model.id}
+                  padding="lg"
+                  withBorder
+                  mb="md"
+                  onClick={() => setSelectedModelId(model.id)}
+                  style={{
+                    borderColor: selectedModelId === model.id ? brandColor : undefined,
+                    borderWidth: selectedModelId === model.id ? 2 : 1,
+                  }}
+                >
+                  {/* Top Row: Name and Hover Info */}
+                  <Group justify="space-between" mt="md" mb="xs">
+                    <Text fw={500}>
+                      {model.modelIcon} {model.name}
+                    </Text>
+
+                    <HoverCard openDelay={200} closeDelay={400}>
+                      <HoverCard.Target>
+                        <IconInfoCircle size={20} />
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown>
+                        <Text size="sm" mt="md">
+                          {model.infoText}
+                        </Text>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  </Group>
+
+                  {/* Description */}
+                  <Text size="sm">{model.description}</Text>
+
+                  {/* Badges */}
+                  {model.modelTags && model.modelTags.length > 0 && (
+                    <Group mt="sm">
+                      {model.modelTags.map((tag, idx) => (
+                        <Badge key={idx} variant="outline">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Group>
+                  )}
                 </Card>
               ))}
-            </Stack>
-          </Card>
-        </Grid.Col>
 
-        {/* Right Column: Models */}
-        <Grid.Col span={18}>
-          <Card padding="lg">
-            <Title order={2} mb="md">
-              Optimization Models
-            </Title>
-
-            {models.map((model) => (
-              <Card
-                key={model.id}
-                padding="lg"
-                withBorder
-                mb="md"
-                onClick={() => setSelectedModelId(model.id)}
-                style={{
-                  borderColor: selectedModelId === model.id ? "blue" : undefined,
-                  borderWidth: selectedModelId === model.id ? 2 : 1,
-                }}
-              >
-                {/* Top Row: Name and Hover Info */}
-                <Group justify="space-between" mt="md" mb="xs">
+              {/* Setting Card */}
+              <Card padding="lg" >
+                <Group align="center" mb="sm">
                   <Text fw={500}>
-                    {model.modelIcon} {model.name}
+                    Advanced Settings <Pill>Optional</Pill>
                   </Text>
 
-                  <HoverCard openDelay={200} closeDelay={400}>
-                    <HoverCard.Target>
-                      <IconInfoCircleFilled size={24} />
-                    </HoverCard.Target>
-                    <HoverCard.Dropdown>
-                      <Text size="sm" mt="md">
-                        {model.infoText}
-                      </Text>
-                    </HoverCard.Dropdown>
-                  </HoverCard>
+                  <ActionIcon onClick={toggle} variant="transparent" size="lg" aria-label="Settings">
+                    {opened ? <IconChevronUp size={24} /> : <IconChevronDown size={24} />}
+                  </ActionIcon>
                 </Group>
 
-                {/* Description */}
-                <Text size="sm">{model.description}</Text>
+                <Collapse in={opened}>
+                  <Stack mt="md">
+                    <Text size="sm">Date & Period Settings</Text>
 
-                {/* Badges */}
-                {model.modelTags && model.modelTags.length > 0 && (
-                  <Group mt="sm">
-                    {model.modelTags.map((tag, idx) => (
-                      <Badge key={idx} color="blue" variant="light">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </Group>
-                )}
+                    <DatePickerInput
+                      leftSection={<IconCalendar size={18} stroke={1.5} />}
+
+                      label="Pick a Start Date"
+                      placeholder="Pick Start Date"
+                      clearable
+                      value={valueStartDate}
+                      onChange={setValueStartDate}
+                    // type='range'
+                    />
+
+                    <DatePickerInput
+                      leftSection={<IconCalendar size={18} stroke={1.5} />}
+                      label="Pick an End Date"
+                      placeholder="Pick End Date"
+                      clearable
+                      value={valueEndDate}
+                      onChange={setValueEndDate}
+                      minDate={valueStartDate ?? undefined}
+                      disabled={!valueStartDate}             // disabled if no start date
+                    />
+                    <Select
+                      label="Select Period"
+                      description="Period defines the data frequency"
+                      data={["5d", "1wk", "1mo", "3mo"]}
+                      searchable
+                      clearable
+                      value={period}
+                      onChange={setPeriod}
+                    />
+
+                  </Stack>
+                </Collapse>
               </Card>
-            ))}
-
-            {/* Setting Card */}
-            <Card padding="lg" shadow="sm">
-              <Group align="center" mb="sm">
-                <Text fw={500}>
-                  Advanced Settings <Pill>Optional</Pill>
-                </Text>
-
-                <ActionIcon onClick={toggle} variant="transparent" size="lg" aria-label="Settings">
-                  {opened ? <IconChevronUp size={24} /> : <IconChevronDown size={24} />}
-                </ActionIcon>
-              </Group>
-
-              <Collapse in={opened}>
-                <Stack mt="md">
-                  <Text size="sm">Config Settings</Text>
-
-                  <DatePickerInput
-                    label="Pick a Start Date"
-                    placeholder="Pick Start Date"
-                    value={valueStartDate}
-                    onChange={setValueStartDate}
-                  />
-
-                  <DatePickerInput
-                    label="Pick an End Date"
-                    placeholder="Pick End Date"
-                    value={valueEndDate}
-                    onChange={setValueEndDate}
-                  />
-                  <Select
-                    label="Select Period"
-                    description="Period defines the data frequency"
-                    data={["5d", "1wk", "1mo", "3mo"]}
-                    searchable
-                    clearable
-                    value={period}
-                    onChange={setPeriod}
-                  />
 
 
-                </Stack>
-              </Collapse>
+              {/* Conditional Button at the bottom of the parent card */}
+              {selectedModelId && (
+                <Button mt="md" onClick={() => handleModelClick(selectedModelId)}>
+                  {loading ? <Loader size="sm" /> : "Use this model"}
+                </Button>
+              )}
+
             </Card>
-
-
-            {/* Conditional Button at the bottom of the parent card */}
-            {selectedModelId && (
-              <Button mt="md" onClick={() => handleModelClick(selectedModelId)}>
-                {loading ? <Loader size="sm" /> : "Use this model"}
-              </Button>
-            )}
-
-          </Card>
-        </Grid.Col>
-      </Grid>
-    </Container>
+          </Grid.Col>
+        </Grid>
+      </Container>
+      {/* // </Container> */}
+    </>
   );
 }

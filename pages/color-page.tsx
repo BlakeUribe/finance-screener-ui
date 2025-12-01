@@ -112,8 +112,8 @@ export default function ColorPage() {
           </Table>
         </Card>
       </Stack>
-      <Stack>
 
+      <Stack>
         <Button>
           Defualt
         </Button>
