@@ -14,7 +14,11 @@ import {
 
 import { theme, defaultShade } from "@/theme";
 
+const successColorShades = theme.colors?.success || [];
+
+
 const brandColors = theme.colors?.brand || ["#1509f1"];
+const successColor = successColorShades[2] || "green";
 
 interface PortfolioPoint {
   portfolio_std: number;
@@ -25,6 +29,9 @@ interface PortfolioPoint {
 interface RiskReturnChartProps {
   distinct: PortfolioPoint[];
   frontier: PortfolioPoint[];
+  sharpeRatio: number;
+  expectedReturn: number;
+  portfolioStd: number;
   distinctColor?: string;
   frontierColor?: string;
 }
@@ -33,6 +40,9 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
   ({
     distinct,
     frontier,
+    sharpeRatio,
+    expectedReturn,
+    portfolioStd,
     distinctColor = brandColors[defaultShade - 4] ?? brandColors[1],
     frontierColor = brandColors[defaultShade]
   }) => {
@@ -49,8 +59,7 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
     const stdPadding = (stdMax - stdMin) * 0.3;
     const retPadding = (retMax - retMin) * 0.3;
 
-    const sharpeRatio = 1.29
-    const riskFreeRate = 0.041
+    const riskFreeRate = 0.041 // NEED from backend
 
     return (
       <ResponsiveContainer width="100%" height={500}>
@@ -76,13 +85,8 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
             padding={{ top: 20, bottom: 20 }}
             domain={[retMin - retPadding, retMax + retPadding]}
             tickFormatter={(val) => `${Math.round(val * 100)}%`} // convert to percent and round
-          // tickCount={Math.ceil(retMin)} // approximate ticks every 5%
           />
 
-          <Tooltip
-            cursor={{ strokeDasharray: '3 3' }}
-            formatter={(value: number) => `${Math.round(value * 100)}%`}
-          />
 
           <Legend align="right" wrapperStyle={{ fontSize: 12, lineHeight: '16px' }} />
 
@@ -91,6 +95,8 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
             data={distinct}
             fill={distinctColor}
             isAnimationActive={false}
+            tooltipType="none"
+
           />
 
           <Scatter
@@ -98,12 +104,14 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
             data={frontier}
             fill={frontierColor}
             isAnimationActive={false}
+            tooltipType="none"
           />
 
 
           <ReferenceLine
+            // label="CAL"
             stroke={brandColors[defaultShade]}
-            strokeWidth={2}
+            strokeWidth={4}
             segment={[
               { x: 0.0, y: riskFreeRate }, // need to fetch risk free rate
               { x: ((retMax - riskFreeRate) / sharpeRatio), y: retMax } // this will basically be a math function
@@ -111,14 +119,61 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
 
             ]}
           />
-          <ReferenceDot
-            x={0.19}      // std
-            y={0.29}      // return, can fetch both from api
-            r={4}        // radius
-            fill="red"
-          />
+          {/* <ReferenceDot
+            x={portfolioStd}
+            y={expectedReturn}
+            r={6}
+            fill={successColor}
+            label={{
+              value: "Optimal Portfolio",
+              position: "top",   // place above
+              offset: 10,       // move slightly further up
+              fontSize: 12,      // optional: adjust size
+              // textAnchor: "end"  // align left relative to dot
+            }}
+          /> */}
+
+          <Scatter
+            name="Optimal Portfolio"
+            data={[{ portfolio_std: portfolioStd, portfolio_ret: expectedReturn }]}
+            fill={successColor}
+            r={6}
+
+          >
+            <Tooltip
+              cursor={{ strokeDasharray: "3 3" }}
+
+              formatter={(value: number, name: string) => {
+                const prettyNames: Record<string, string> = {
+                  portfolio_std: "Risk (Std Dev)",
+                  portfolio_ret: "Return"
+                };
+
+                const label = prettyNames[name] ?? name;
+
+                return [`${(value * 100).toFixed(2)}%`, label];
+              }}
+
+              labelFormatter={() => ""}
+
+              contentStyle={{
+                backgroundColor: "#1a1a1a",
+                border: "1px solid #555",
+                borderRadius: 6,
+                padding: "8px 12px",
+                color: "#fff",
+              }}
+
+              itemStyle={{
+                color: "#fff",
+                fontSize: 12,
+              }}
+            />
+          </Scatter>
 
           <ReferenceLine y={0} strokeWidth={2} />
+          <ReferenceLine x={0} strokeWidth={2} />
+
 
         </ScatterChart>
       </ResponsiveContainer>

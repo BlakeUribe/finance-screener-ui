@@ -1,4 +1,6 @@
-// pages/portfolio.tsx
+
+// Check out useScrollSpy
+
 import { useRef } from 'react';
 import { Text, Container, Card, Grid, Title, Timeline, Stack } from '@mantine/core';
 import { IconTable } from '@tabler/icons-react';

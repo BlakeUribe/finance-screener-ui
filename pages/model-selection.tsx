@@ -5,7 +5,7 @@ import { DatePickerInput } from '@mantine/dates';
 import { IconCalendar, IconActivity, IconChevronDown, IconChevronUp, IconInfoCircle, } from '@tabler/icons-react';
 import { useSelectedStocks, } from '@/hooks/useSelectedStocks';
 // import { theme, defaultShade } from '@/theme';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useWindowScroll } from '@mantine/hooks';
 import { theme, defaultShade } from '@/theme';
 
 const brandColor = theme.colors?.brand?.[defaultShade]
@@ -64,8 +64,12 @@ export default function ModelSelectionPage() {
   const [valueEndDate, setValueEndDate] = useState<string | null>(null);
   const [period, setPeriod] = useState<string | null>(null);
 
+  const [scroll, scrollTo] = useWindowScroll();
+
   const handleModelClick = async (modelId: string) => {
     if (selectedTickers.length === 0) return;
+    
+    scrollTo({ y: 0 });
 
     setLoading(true);
     const tickers = selectedTickers.map((s) => s.Tickers);

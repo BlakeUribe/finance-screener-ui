@@ -32,10 +32,13 @@ function Th({ children, sorted, reversed, onSort }: ThProps) {
       <UnstyledButton
         onClick={onSort}
         style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
+          // width: '100%',
+          // display: 'flex',
+          display: "flex",
+          alignItems: "left",
+          // justifyContent: 'space-between'
+          // justifyContent: 'flex-start',   // ← left-align the whole header
+          gap: 4
         }}
       >
         {children}
@@ -141,7 +144,13 @@ export function DataTable<T extends Record<string, any>>({
             {paginatedData.map((row, idx) => (
               <Table.Tr
                 key={idx}
-                bg={selectedRows.includes(row) ? theme.colors.brand[buttonBackgroundColor] : undefined}
+                // bg={selectedRows.includes(row) ? theme.colors.brand[buttonBackgroundColor] : undefined}
+                style={{
+                  backgroundColor: selectedRows.includes(row)
+                    ? theme.colors.brand[buttonBackgroundColor]
+                    : undefined,
+                  color: selectedRows.includes(row) ? theme.white : undefined   // ★ auto-contrast text
+                }}
               >
                 {selectable && (
                   <Table.Td>
@@ -163,7 +172,10 @@ export function DataTable<T extends Record<string, any>>({
                       style={{
                         // whiteSpace: 'nowrap',     // ★ prevents squeezing text
                         overflow: 'hidden',
-                        textOverflow: 'ellipsis'
+                        textOverflow: 'ellipsis',
+                        padding: "4px 4px",        // tighten vertical + horizontal spacing
+                        textAlign: "center"        // ← aligns cell contents
+
                       }}
                     >
                       {typeof value === 'number' ? (
@@ -174,11 +186,13 @@ export function DataTable<T extends Record<string, any>>({
                           variant="outline"
                           size="xs"
                           style={{
-                            backgroundColor: lightColor,      // always white
-                            color: brandColor,               // brand-colored text
-                            borderColor: brandColor,         // brand-colored border
-                            fontSize: 8,                    // smaller text
-                            padding: '2px 6px',              // optional: tighter padding
+                            backgroundColor: lightColor,
+                            color: brandColor,
+                            borderColor: brandColor,
+                            fontSize: 8,
+                            padding: "1px 3px",         // tighter internal padding
+                            height: "auto",             // allows wrapping
+                            whiteSpace: "normal",       // enable wrapping
                           }}
                         >
                           {String(value)}

@@ -12,6 +12,8 @@ export const buttonBackgroundColor = 4;
 export const theme: MantineThemeOverride = {
   fontFamily: 'Inter, sans-serif',
   primaryColor: 'brand',
+  // autoContrast: true,
+  // luminanceThreshold: 0.99,
   colors: {
     brand: [
       "hsl(230 80% 73%)",

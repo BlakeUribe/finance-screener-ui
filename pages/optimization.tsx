@@ -7,7 +7,9 @@ import {
   Card,
   Stack,
   LoadingOverlay,
+  Table
 } from '@mantine/core';
+
 import { IconCurrencyDollar, IconTimeline, IconChartArcs } from '@tabler/icons-react';
 
 import { DataTable } from '@/components/DataTable';
@@ -35,6 +37,7 @@ export default function OptimizationPage() {
 
   const [backtestResult, setBacktestResult] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
 
   // 3. OPTIMIZATION: useMemo for data transformation
   // This prevents re-mapping the array on every render
@@ -94,12 +97,16 @@ export default function OptimizationPage() {
       : [],
     [data]);
 
+  const sharpeRatio = data?.result?.portfolio?.sharpe_ratio ?? null;
+  const expectedReturn = data?.result?.portfolio?.expected_return ?? null;
+  const portfolioStd = data?.result?.portfolio?.portfolio_std ?? null;
+
   const metrics = useMemo(() =>
     data?.result?.portfolio
       ? [
-        { label: 'Expected Return', value: data.result.portfolio.expected_return, icon: <IconCurrencyDollar /> },
-        { label: 'Portfolio Volatility', value: data.result.portfolio.portfolio_std, icon: <IconTimeline /> },
-        { label: 'Sharpe Ratio', value: data.result.portfolio.sharpe_ratio, icon: <IconChartArcs /> },
+        { label: 'Expected Return', value: expectedReturn, icon: <IconCurrencyDollar /> },
+        { label: 'Portfolio Volatility', value: portfolioStd, icon: <IconTimeline /> },
+        { label: 'Sharpe Ratio', value: sharpeRatio, icon: <IconChartArcs /> },
       ]
       : [],
     [data]);
@@ -150,7 +157,30 @@ export default function OptimizationPage() {
 
         <Card mb="md" padding="md" withBorder>
           <Text fw={500} mb="sm">Portfolio Holdings</Text>
-          <DataTable data={holdingsData} rowsPerPage={10} selectable={false} />
+          <DataTable 
+            data={holdingsData} 
+            rowsPerPage={10} 
+            selectable={false} 
+          />
+
+<Table withTableBorder highlightOnHover>
+  <Table.Thead>
+    <Table.Tr>
+      <Table.Th>Ticker</Table.Th>
+      <Table.Th>Weight</Table.Th>
+    </Table.Tr>
+  </Table.Thead>
+
+  <Table.Tbody>
+    {holdingsData.map((row: any, index: any) => (
+      <Table.Tr key={index}>
+        <Table.Td>{row.ticker}</Table.Td>
+        <Table.Td>{(row.weight * 100).toFixed(2)}%</Table.Td>
+      </Table.Tr>
+    ))}
+    
+  </Table.Tbody>
+</Table>
         </Card>
 
         <Card>
@@ -160,6 +190,9 @@ export default function OptimizationPage() {
             <RiskReturnChart
               distinct={data.distinct_portfolios}
               frontier={data.frontier_portfolios}
+              sharpeRatio={sharpeRatio}
+              expectedReturn={expectedReturn}
+              portfolioStd={portfolioStd}
             />
           )}
         </Card>
