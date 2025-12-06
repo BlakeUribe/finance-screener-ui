@@ -100,6 +100,7 @@ export default function OptimizationPage() {
   const sharpeRatio = data?.result?.portfolio?.sharpe_ratio ?? null;
   const expectedReturn = data?.result?.portfolio?.expected_return ?? null;
   const portfolioStd = data?.result?.portfolio?.portfolio_std ?? null;
+  const riskFreeRate = data?.result?.portfolio?.risk_free_rate ?? null;
 
   const metrics = useMemo(() =>
     data?.result?.portfolio
@@ -193,6 +194,7 @@ export default function OptimizationPage() {
               sharpeRatio={sharpeRatio}
               expectedReturn={expectedReturn}
               portfolioStd={portfolioStd}
+              riskFreeRate={riskFreeRate}
             />
           )}
         </Card>

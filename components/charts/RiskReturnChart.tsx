@@ -32,6 +32,7 @@ interface RiskReturnChartProps {
   sharpeRatio: number;
   expectedReturn: number;
   portfolioStd: number;
+  riskFreeRate: number;
   distinctColor?: string;
   frontierColor?: string;
 }
@@ -43,6 +44,7 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
     sharpeRatio,
     expectedReturn,
     portfolioStd,
+    riskFreeRate,
     distinctColor = brandColors[defaultShade - 4] ?? brandColors[1],
     frontierColor = brandColors[defaultShade]
   }) => {
@@ -59,7 +61,7 @@ export const RiskReturnChart: React.FC<RiskReturnChartProps> = memo(
     const stdPadding = (stdMax - stdMin) * 0.3;
     const retPadding = (retMax - retMin) * 0.3;
 
-    const riskFreeRate = 0.041 // NEED from backend
+    // const riskFreeRate = 0.041 // NEED from backend
 
     return (
       <ResponsiveContainer width="100%" height={500}>

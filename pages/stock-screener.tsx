@@ -15,14 +15,15 @@ export default function StockScreener() {
   const [loading, setLoading] = useState(true);
   const { selectedTickers, setSelectedTickers } = useSelectedStocks();
 
+  const URL = 'https://ojjpm8tp92.execute-api.us-west-2.amazonaws.com/prod/'
   // -------------------------------
   // Fetch stock data
   // -------------------------------
   useEffect(() => {
-    async function fetchStockData() {
+    async function fetchStockData() { 
       setLoading(true);
       try {
-        const res = await fetch('https://ojjpm8tp92.execute-api.us-west-2.amazonaws.com/prod/', {
+        const res = await fetch(URL, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });

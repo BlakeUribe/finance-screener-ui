@@ -13,13 +13,18 @@ const failureColor = theme.colors?.danger?.[2] || "red";
 const brand = theme.colors?.brand || "blue";
 
 // Custom chart generator using PerformanceChart
-const createChart = (data: any[], seriesName: string, color?: string) => {
+const createChart = (data: any[], seriesName: string) => {
   const chartData = data.map(d => ({
     Date: d.Date,
     Value: d[seriesName] ?? null,
   }));
 
-  return <PerformanceChart data={chartData} dataKey="Value" positiveColor={successColor} negativeColor={failureColor} />;
+  return <PerformanceChart 
+            data={chartData} 
+            dataKey="Value" 
+            positiveColor={successColor} 
+            negativeColor={failureColor} 
+          />;
 };
 
 export default function HomePage() {
